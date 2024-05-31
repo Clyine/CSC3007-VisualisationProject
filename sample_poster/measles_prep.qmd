@@ -1,0 +1,182 @@
+---
+title: "Visualizing Measles Incidence in the USA (1928--2001)"
+subtitle: "Data Preparation"
+format: html
+---
+
+
+# Introduction
+
+This document contains the data engineering required to reconstruct and improve the plot by @debold_battling_2015, shown in @fig-wsj, depicting the measles incidence rate in the USA by state and year between 1928 and 2013.
+
+The code below requires the following packages:
+
+```{r}
+#| label: library
+#| message: false
+
+library(tidyverse)
+library(knitr)
+library(readxl)
+library(zoo)
+```
+
+```{r}
+#| label: fig-wsj
+#| echo: false
+#| fig.cap: "Visualization of measles incidence in the United States from
+#|   1928 to 2013 by @debold_battling_2015."
+
+include_graphics("images/wsj.png")
+```
+
+
+# Data Cleaning
+
+@debold_battling_2015 based their visualization on data by @panhuis_counts_2018, available in CSV format with each row representing a geographic enumeration unit, such as state or county, in a specific week. Relevant columns for data processing include:
+
+*   `Admin1Name`: State name
+*   `Admin1ISO`: State abbreviated in the form "US-AK" (Alaska),
+    "US-AL" (Alabama), etc.
+*   `Admin2Name`: Either the name of the county or `NA` if the enumeration
+    unit is a state. As we are only interested in state-level data, we only
+    retain rows where `Admin2Name` equals `NA`:
+*   `PeriodStartDate` and `PeriodEndDate`: Formatted as `yyyy-mm-dd`
+*   `PartOfCumulativeCountSeries`: 0 or 1. This variable is described in the
+    file `README.txt`, accompanying the source data, as follows:
+    
+    >   Separate cumulative from non-cumulative time interval series. Project
+    >   Tycho case count time series can be in a cumulative or fixed-interval
+    >   format. Cumulative case count time series consist of overlapping case
+    >   count intervals starting on the same date, but ending on different
+    >   dates.
+    >   Cumulative case count time series result from case reporting for
+    >   "all previous weeks" instead of "the most recent week only". An
+    >   example of a cumulative case count time series is:
+	>   - time interval 1: Jan 1-Jan 7: 10 cases
+	>   - time interval 2: Jan 1-Jan 14: 15 cases
+	>   - time interval 3: Jan 1-Jan 21: 17 cases
+	>   - etc.
+    >
+    >   Fixed-interval case count time series consist of mutually exclusive
+    >   time intervals that all start and end on different date and all have
+    >   identical length (day, week, month, year), for example:
+	>   - time interval 1: Jan 1-Jan 7: 10 cases
+	>   - time interval 2: Jan 8-Jan 14: 7 cases
+	>   - time interval 3: Jan 15-Jan 21: 3 cases
+	>   - etc.
+
+    An inspection of the data revealed that a value of 0 refers to a
+    fixed-interval case count and 1 to a cumulative case count.
+*   `CountValue`: The number of cases in the enumeration unit in the
+    given week. If `PartOfCumulativeCountSeries` equals 0, the value represents
+    the new number of cases. Otherwise, the value represents the cumulative
+    number of cases for the given year.
+
+```{r}
+#| label: input-data
+#| message: false
+
+measles <-
+  "US.14189004.csv" |>
+  read_csv() |>
+  filter(is.na(Admin2Name), PartOfCumulativeCountSeries == 0) |>
+  select(Admin1Name, Admin1ISO, PeriodStartDate, PeriodEndDate, CountValue)
+measles
+```
+
+For further subsetting, it might seem sufficient to calculate annual incidence by considering only the cumulative count from the latest `PeriodStartDate` of each year. However, as pointed out by @allison_how_2015, the source data has missing weeks, treated as zero in the cumulative counts, potentially underestimating the annual total. Instead, we will calculate the weekly mean from non-missing fixed-interval case counts for each year.
+
+The following output confirms that the end date consistently occurs 6 days
+after the start date:
+
+```{r}
+#| label: period-length
+
+periods_in_days <-
+  measles |>
+  mutate(PeriodLength = PeriodEndDate - PeriodStartDate) |>
+  distinct(PeriodLength) |>
+  pull()
+all(periods_in_days == 6)
+```
+
+Therefore, we can calculate the mean weekly case count for each state and year, using the `year()` function from the lubridate package, as follows:
+
+```{r}
+#| label: weekly-mean
+
+measles <-
+  measles |>
+  mutate(year = year(PeriodStartDate)) |>
+  summarize(
+    mean_weekly_count = mean(CountValue, na.rm = TRUE),
+    .by = c(Admin1Name, Admin1ISO, year)
+  )
+measles
+```
+
+Next, we need to normalize the counts by state population, tabulated by @stats_state_2023, to normalize the incidence:
+
+```{r}
+#| label: state-census
+
+census <-
+  "state-census-counts-2020.xlsx" |>
+  read_xlsx(skip = 1, n_max = 52) |>
+  filter(State != "United States") |>
+  mutate(State = str_to_upper(State))
+census
+```
+
+Because the United States Census is only conducted every ten years, we need to obtain a population estimate for the remaining years. We can employ linear interpolation, as implemented by `na.approx()` from the zoo package:
+
+```{r}
+#| label: population-interpolation
+
+census <-
+  census |>
+  pivot_longer(
+    -State,
+    names_to = "year",
+    names_transform = list(year = as.integer),
+    values_to = "population",
+    values_transform = list(population = as.numeric)
+  ) |>
+  complete(State, year = min(year):max(year)) |>
+  mutate(population = na.approx(population), .by = State)
+census
+```
+
+Finally, we merge the `measles` and `census` data frames to calculate the incidence per 100,000:
+
+```{r}
+#| label: incidence
+
+measles <-
+  measles |>
+  left_join(census, by = c("Admin1Name" = "State", "year")) |>
+  mutate(
+    incidence = mean_weekly_count / population * 100000,
+    state = str_sub(Admin1ISO, start = 4)
+  ) |>
+  filter(year >= 1928) # Start of WSJ x-axis
+measles
+```
+
+
+# Conclusion
+
+The data are now ready for visualization. The next step will be to create a plot that will allow us to compare the incidence of measles across states and years, using the ggplot2 package to create a heatmap of the incidence.
+
+In the original HTML version of the plot, the user experience is enriched by an infotip, activated by hovering over any tile to display specific incidence data for a given state and year. Although the direct view of several neighboring tiles might be obstructed, this potential issue is addressed by employing partial transparency (@fig-wsj-with-tooltip).
+
+```{r}
+#| label: fig-wsj-with-infotip
+#| echo: false
+#| fig-cap: Screenshot of the original plot with activated infotip.
+
+include_graphics("images/wsj_with_infotip.png")
+```
+
+If replicating the infotip functionality is desired, several functions from R's plotly package, such as `ggplotly()`, could be employed. However, for the scope of this project, a static heatmap will suffice.
