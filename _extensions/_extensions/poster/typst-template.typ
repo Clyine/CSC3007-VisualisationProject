@@ -102,8 +102,8 @@
           //#text(font: "Courier", size: footer_url_font_size, footer_url) 
           //#h(1fr) 
           #text(size: footer_text_font_size, smallcaps(footer_text)) 
-          #h(1fr) 
-          #text(font: "Courier", size: footer_url_font_size, footer_email_ids)
+          //#h(1fr) 
+          //#text(font: "Courier", size: footer_url_font_size, footer_email_ids)
         ]
       )
     ]
@@ -169,9 +169,7 @@
       columns: (title_column_size, univ_logo_column_size),
       column-gutter: 0pt,
       row-gutter: 50pt,
-      text(title_font_size, title + "\n\n") + 
-      text(authors_font_size, emph(authors) + 
-          "   (" + departments + ") "),
+      text(title_font_size, title + "\n\n") + text(title_font_size*0.8, authors+"\n") +text(authors_font_size*0.8, emph(footer_email_ids +"@sit.singporetech.edu.sg")+ "\n") + text(authors_font_size*0.7, emph(departments)),
       image(univ_logo, width: univ_logo_scale),
     )
   )

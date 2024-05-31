@@ -1,13 +1,13 @@
 ---
-title: PROJECT TITLE
+title: Worldwide Overproduction of Cars
 format:
   poster-typst: 
     size: "33x23" # Approximately A1
     poster-authors: "Jingquan Chen, John Wang, Keng Li Chia, Jourdan Lim, Perpetua Raj, Joey Tan"
-    departments: "Information and Communication Technologies"
+    departments: "Computing Science"
     institution-logo: "./images/sit-logo.png"
     footer-text: "Information Visualization 2024"
-    footer-emails: "2101268@sit.singaporetech.edu.sg,2101925@sit.singaporetech.edu.sg,2102718@sit.singaporetech.edu.sg,2102516@sit.singaporetech.edu.sg,2101771@sit.singaporetech.edu.sg,2001885@sit.singaporetech.edu.sg"
+    footer-emails: "{2101268, 2101925, 2102718, 2102516, 2101771, 2001885}"
 execute:
   echo: false
 knitr:
