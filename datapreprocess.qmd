@@ -1,0 +1,300 @@
+---
+title: "Data Preprocessing"
+author: "Jingquan Chen, John Wang, Keng Li Chia, Jourdan Lim, Perpetua Raj, Joey Tan"
+format: html
+editor: visual
+---
+
+# Improving Data Visualization on Crude Oil Analysis: World car production grows 3 times faster than global oil supplies
+
+## Imports
+
+```{r}
+library(tidyverse)
+library(dplyr)
+library(gt)
+library(ggplot2)
+library(scales)
+```
+
+## Visualization Source
+
+-   [Crude Oil Peak](https://crudeoilpeak.info/world-car-production-grows-3-times-faster-than-global-oil-supplies)
+
+## Data Sources
+
+-   [Cars Production Statistics](https://www.oica.net/category/production-statistics/)
+    -   Created CSV from tables data
+-   [Petroleum and Other Liquids: Annual Petroleum and Other Liquids Production](https://www.eia.gov/international/data/world/petroleum-and-other-liquids/annual-petroleum-and-other-liquids-production?pd=5&p=0000000000000000000000000000000000vg&u=0&f=A&v=mapbubble&a=-&i=none&vo=value&&t=C&g=00000000000000000000000000000000000000000000000001&l=249-ruvvvvvfvtvnvv1vrvvvvfvvvvvvfvvvou20evvvvvvvvvvnvvvs0008&s=94694400000&e=1704067200000)
+    -   Deleted Column 1 (API)
+
+## Load Data
+
+```{r}
+cars_raw <- read.csv("cars_data.csv")
+oil_raw <- read.csv("oil_data.csv")
+```
+
+## Preview Raw Data
+
+```{r}
+cars_raw %>% head()
+oil_raw %>% head()
+```
+
+## Data Cleaning & Preprocessing
+
+### Preprocess Oil Data
+
+#### Step 1: Get Countries
+
+```{r}
+# Create sequence of row indices in multiplies of 8 to get countries
+countries_indices <- seq(1, nrow(oil_raw), by = 8)
+
+# Select every 8th row
+countries_selected <- oil_raw[countries_indices, ]
+
+# Select only the first column
+countries_oil <- countries_selected[, 1]
+
+# Display countries
+print(countries_oil)
+```
+
+#### Step 2: Get Years
+
+```{r}
+# Get all the column names, for years
+years_selected <- colnames(oil_raw)[2:ncol(oil_raw)]
+
+# Remove "X" and convert to numeric
+years_oil <- as.numeric(gsub("X", "", years_selected))
+
+# Display years
+print(years_oil)
+```
+
+#### Step 3: Get Petroleum Data from Total_Petroleum_and_Other_Liquids Column
+
+```{r}
+# Create indices
+total_petroleum_indices <- seq(3, nrow(oil_raw), by = 8)
+
+# Get the data
+petroleum_selected <- oil_raw[total_petroleum_indices, ]
+
+# Display the data
+print(petroleum_selected)
+```
+
+#### Step 4: Create new dataframe with Countries, Years, and Total Petroleum and Other Liquids
+
+```{r}
+
+# Create new dataframe
+new_oil_df <- petroleum_selected
+
+# Replace first column with countries
+new_oil_df[, 1] <- countries_oil
+
+# Replace column names with numeric years
+colnames(new_oil_df) <- c("Country", years_oil)
+
+# Select columns to convert to numeric
+columns_to_convert <- names(new_oil_df)[-1]
+
+# Convert all columns to numeric
+new_oil_df[, columns_to_convert] <- lapply(new_oil_df[, columns_to_convert], as.numeric)
+
+# Convert first row country names to all upper case
+new_oil_df[, 1] <- toupper(new_oil_df[, 1])
+
+# Start index of selected_rows from 0
+rownames(new_oil_df) <- NULL
+
+# Write CSV file
+write.csv(new_oil_df, file = "processed_oil_all.csv", row.names = FALSE)
+
+# Display new data
+print(new_oil_df)
+```
+
+### Preprocess Cars Data
+
+#### Step 1: Process Countries Names, Remove Datarows with ""
+
+```{r}
+# Create new dataframe
+new_cars_df <- cars_raw
+
+# Convert column 1 names to upper
+new_cars_df[, 1] <- toupper(new_cars_df[, 1])
+
+# Find rows where the data in the first column is ""
+rows_with_empty_first_column <- which(new_cars_df[, 1] == "")
+
+# Find rows where the data in the first column is not ""
+rows_to_keep <- new_cars_df[, 1] != ""
+
+# Subset the data frame to keep rows where the data in the first column is not ""
+new_cars_df <- new_cars_df[rows_to_keep, ]
+
+# Display new dataframe
+print(new_cars_df)
+```
+
+#### Step 2: Get Unique Countries
+
+```{r}
+# Get unique values in column 1
+unique_countries <- unique(new_cars_df[,1])
+
+# Print Unique Countries
+print(unique_countries)
+```
+
+#### Step 3: Change values to match common country names
+
+```{r}
+# Change values in the first column from "CZECH REP." to "CZECH REPUBLIC"
+new_cars_df[new_cars_df[, 1] == "CZECH REP.", 1] <- "CZECH REPUBLIC"
+
+# Get unique values in column 1
+unique_countries <- unique(new_cars_df[,1])
+
+# Check unique countries is correct
+print(unique_countries)
+```
+
+#### Step 4: Pivot wider on year, concatenate vertically on data on common country names, change column data type to numeric
+
+```{r}
+# Get all column headers
+column_headers <- colnames(new_cars_df)
+
+# Pivot wider on Year
+new_cars_df <- pivot_wider(new_cars_df, names_from = "Year", values_from = "Total")
+
+# Remove Cars, Commercial.Vehicles, Change columns
+new_cars_df <- new_cars_df[, -c(2, 3, 4)]
+
+# Change all columns to numeric except the first column, replace comma and space in numeric terms
+new_cars_df[, -1] <- lapply(new_cars_df[, -1], function(x) as.numeric(gsub("[ ,]", "", x)))
+
+# Concatenate vertically the columns where they have the same country.region name
+new_cars_df <- new_cars_df %>%
+  group_by(Country.Region) %>%
+  summarise(across(, ~sum(.x, na.rm = TRUE)))
+
+# Rename first column to Country
+colnames(new_cars_df)[1] <- "Country"
+
+# Write CSV file
+write.csv(new_cars_df, file = "processed_cars_all.csv", row.names = FALSE)
+
+# Display new dataframe
+print(new_cars_df)
+```
+
+### Data Summarisation: Get Common Data from both Cars and Oil Data
+
+#### Step 1: Get Common Countries, Years
+
+```{r}
+# Get Common Countries
+common_countries <- intersect(new_cars_df$Country, new_oil_df$Country)
+print(common_countries)
+
+# Get Common Years
+common_years <- intersect(colnames(new_cars_df)[-1], colnames(new_oil_df)[-1])
+print(common_years)
+```
+
+#### Step 2: Get Common Data
+
+```{r}
+# Filter data based on common countries and common years
+new_cars_df_filtered <- new_cars_df %>%
+  filter(Country %in% common_countries) %>%
+  select(all_of(c("Country", common_years)))
+print(new_cars_df_filtered)
+
+new_oil_df_filtered <- new_oil_df %>%
+  filter(Country %in% common_countries) %>%
+  select(all_of(c("Country", common_years)))
+print(new_oil_df_filtered)
+```
+
+#### Step 3: Write CSV Out for filtered data
+
+```{r}
+# Write CSV file for cars
+write.csv(new_cars_df_filtered, file = "processed_cars_filtered.csv", row.names = FALSE)
+
+# Write CSV file for oil
+write.csv(new_oil_df_filtered, file = "processed_oil_filtered.csv", row.names = FALSE)
+```
+
+#### Step 3: Get BRIC Oil Production
+
+```{r}
+# Filter BRIC countries
+bric_countries_oil <- new_oil_df_filtered %>%
+  filter(Country %in% c("BRAZIL", "RUSSIA", "INDIA", "CHINA"))
+
+# Total BRIC countries oil production
+total_bric_oil <- bric_countries_oil %>%
+  summarise(across(2:ncol(bric_countries_oil), sum, na.rm = TRUE))
+
+# Include first column as BRIC name
+total_bric_oil <- cbind("Country" = "BRIC", total_bric_oil)
+print(total_bric_oil)
+```
+
+#### Step 4: Write CSV Out for BRIC Oil data
+
+```{r}
+# Write CSV file for BRIC oil
+write.csv(total_bric_oil, file = "processed_oil_bric.csv", row.names = FALSE)
+```
+
+## Data Visualization
+
+### Plotting the Total Oil Production of BRIC Countries
+
+```{r}
+
+# Plot the total oil production of BRIC countries
+total_bric_oil %>%
+  pivot_longer(cols = -Country, names_to = "Year", values_to = "Total_petroleum_and_other_liquids") %>%
+  ggplot(aes(x = Year, y = Total_petroleum_and_other_liquids, color = Country, group = Country)) +
+  geom_line() +
+  labs(title = "Total Petroleum and Other Liquids Production",
+       subtitle = "By BRIC Countries and Year",
+       x = "Year",
+       y = "Total Petroleum and Other Liquids (Mb/d)",
+       caption = "Source: EIA") +
+  theme_minimal()
+```
+
+### Plotting the Total Cars Production of All Countries
+
+```{R}
+# Pivot wider on the cars filtered dataframe
+plot_cars_filtered <-
+  new_cars_df_filtered %>%
+    pivot_longer(cols = -Country, names_to = "Year", values_to = "Total")
+
+# Plot the cars production graph of all the countries
+plot_cars_filtered %>%
+  ggplot(aes(x = Year, y = Total, color = Country, group = Country)) +
+  geom_line() +
+  labs(title = "Total Cars Production",
+       subtitle = "By Countries and Year",
+       x = "Year",
+       y = "Total Cars Production",
+       caption = "Source: OICA") +
+  theme_minimal() +
+  scale_y_continuous(labels = comma) # Format y-axis from scientic notation to comma
+```
