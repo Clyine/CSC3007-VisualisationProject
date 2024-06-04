@@ -38,10 +38,11 @@ Given persistent skepticism in some communities about the efficacy of vaccines, 
 
 ```{r}
 #| label: fig-wsj-on-poster
-#| fig-cap: "Measles incidence by state of the USA and year, published by the
-#|   Wall Street Journal."
-#| out-width: 100%
+#| fig-cap: "Car production by country/region vs global liquid supplies"
+#| out-width: 98%
 
+
+knitr::include_graphics("previous_visualisation.jpg")
 ```
 
 [^debold_battling_2015]: <https://graphics.wsj.com/infectious-diseases-and-vaccines/>
