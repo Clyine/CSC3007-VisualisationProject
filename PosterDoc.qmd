@@ -25,19 +25,18 @@ library(knitr)
 
 # Introduction
 
-Measles is a highly contagious viral infection that can lead to severe complications, including pneumonia, encephalitis, and death. The average number of secondary cases resulting from a single infected individual is estimated to be between 10 and 16,[^guerra_basic_2017] but vaccination is reported to be 97% effective at preventing measles[^franconeri_two-dose_2023]. Consequently, the introduction of the vaccine in 1963 was followed by a significant decline in measles incidence in the USA.
+Over the past decade, global car production has surged by 52%, predominantly driven by China's growth. In contrast, oil supplies have only increased by 16%. This disparity highlights a significant challenge: the demand for cars is outpacing the available oil supply.
 
-[^guerra_basic_2017]: F. M. Guerra et al., “The basic reproduction number (R0) of measles: a systematic review,” The Lancet Infectious Diseases, vol. 17, no. 12, p. e420-e428, 2017
-[^franconeri_two-dose_2023]: L. Franconeri et al., “Two-dose measles vaccine effectiveness remains high over time: A French observational study, 2017–2019,” Vaccine, vol. 41, no. 39, pp. 5797–5804, 2023]
+To further illustrate this issue, CrudeOilPeak[^crude_oil_peak], a website that tracks global oil production and consumption, has created a visualization that compares the growth in car production by country/region against the growth in global liquid supplies[^debold_battling_2015] (@fig-on-poster). While the visualization effectively conveys the disparity between car production and oil supply, we believe that it can be improved to be more visually appealing and easier to digest.  
 
-Given persistent skepticism in some communities about the efficacy of vaccines, it is important to communicate the impact of vaccination on public health. In this project, we built on a visualization of the measles incidence in the USA published by the Wall Street Journal[^debold_battling_2015] (@fig-wsj-on-poster). This visualization has garnered praise as "One of the more compelling data visualizations produced in recent years"[^lee_reproducing_2017]. However, we contend that, despite its effectiveness in summarizing data, several aspects of the plot can be improved.
+[^crude_oil_peak]: <https://crudeoilpeak.info>
 
-[^lee_reproducing_2017]: <https://www.mikelee.co/posts/2017-06-28-wsj-measles-vaccination-chart>
+[^debold_battling_2015]: <https://crudeoilpeak.info/world-car-production-grows-3-times-faster-than-global-oil-supplies>
 
 # Previous Visualization
 
 ```{r}
-#| label: fig-wsj-on-poster
+#| label: fig-on-poster
 #| fig-cap: "Car production by country/region vs global liquid supplies"
 #| out-width: 98%
 
@@ -45,55 +44,19 @@ Given persistent skepticism in some communities about the efficacy of vaccines, 
 knitr::include_graphics("previous_visualisation.jpg")
 ```
 
-[^debold_battling_2015]: <https://graphics.wsj.com/infectious-diseases-and-vaccines/>
 
 # Strengths
 
-*   The heatmap design effectively conveys a high information content without
-    cluttering the plot.
-*   Pointing with the mouse at a tile opens an infotip, enabling readers to
-    retrieve specific incidence data for a given state and
-    year (@fig-infotip_color_change). The infotip only occludes a small
-    portion of the plot, and the partial transparency of the infotip ensures
-    visibility of the tiles underneath.
-*   The vertical line indicating the year of vaccine introduction provides
-    valuable contextual information.
-
-```{r}
-#| label: fig-infotip_color_change
-#| fig-cap: "Zoomed-in screenshot of the original plot with and without
-#|   activated infotip."
-#| out-width: 100%
-
-```
-
+* <>
 
 # Suggested Improvements
 
-1.  *Add a plot title and a source note* so that the figure can be understood in
-    isolation (e.g., when shared on social media).
-1.  *Identify missing data clearly.*  Rendering unknown incidence fully
-    transparent will distinguish it from zero incidence,
-1.  *Include labels for every state.* To avoid overplotting, use two-letter
-    abbreviations instead of full state names and stagger the labels along the
-    y-axis.
-1.  *Add a title to the color legend.*
-1.  *Avoid using a rainbow color palette.* It lacks a meaningful progression
-    through color space and is not colorblind-friendly. Consider using a
-    sequential ColorBrewer palette instead.[^colorbrewer]
-1.  *Use a discrete color palette.* Continuous palettes can make it
-    challenging for humans to detect patterns below just noticeable color
-    differences.
-1.  *Apply a logarithmic color scale* because most data are below the mean
-    incidence.
-1.  *Add grid lines* in ten-year intervals along the x-axis and for every
-    second state along the y-axis. Grid lines will aid in identifying states
-    and years in the middle of the plot, even without the infotip.
-1.  Because there are more missing data on the right side of the plot,
-    *shifting y-axis labels to the right* will improve visually matching
-    states with corresponding grid lines.
-    
-[^colorbrewer]: <https://colorbrewer2.org/#type=sequential&scheme=Reds&n=5>
+1. *Avoid having two y-axis* as it can be confusing and misleading. Two
+different graphs could be created instead.
+
+1. *Too much visual clutter* can make it difficult to interpret the data.
+
+1. <>
     
     
 # Implementation
@@ -129,7 +92,6 @@ We used the Quarto publication framework and the R programming language, along w
 
 # Improved Visualization
 
-Improved Vis code
 ```{r}
 #| label: fig-ggplot
 #| fig-cap: "Revised visualization of measles incidence by state of the USA and
