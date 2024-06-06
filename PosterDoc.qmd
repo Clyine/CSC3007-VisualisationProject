@@ -25,13 +25,13 @@ library(knitr)
 
 # Introduction
 
-Over the past decade, global car production has surged by 52%, predominantly driven by China's growth. In contrast, oil supplies have only increased by 16%. This disparity highlights a significant challenge: the demand for cars is outpacing the available oil supply.
+CrudeOilPeak[^crude_oil_peak], a website that tracks global oil production and consumption as well as its impact on the economy, states that over the past decade, global car production has surged by 52%, predominantly driven by China's growth. In contrast, oil supplies have only increased by 16%[^car_three_times_oil]. This disparity highlights a significant challenge: the demand for cars is outpacing the available oil supply.
 
-To further illustrate this issue, CrudeOilPeak[^crude_oil_peak], a website that tracks global oil production and consumption, has created a visualization that compares the growth in car production by country/region against the growth in global liquid supplies[^debold_battling_2015] (@fig-on-poster). While the visualization effectively conveys the disparity between car production and oil supply, we believe that it can be improved to be more visually appealing and easier to digest.  
+To further illustrate this issue, they have created a visualization that compares the growth in car production by country/region against the growth in global liquid supplies (@fig-on-poster). We found the visualization to be severly lacking and messy, and believe that it can be improved to be more visually appealing and easier to digest.  
 
 [^crude_oil_peak]: <https://crudeoilpeak.info>
 
-[^debold_battling_2015]: <https://crudeoilpeak.info/world-car-production-grows-3-times-faster-than-global-oil-supplies>
+[^car_three_times_oil]: <https://crudeoilpeak.info/world-car-production-grows-3-times-faster-than-global-oil-supplies>
 
 # Previous Visualization
 
@@ -49,14 +49,17 @@ knitr::include_graphics("previous_visualisation.jpg")
 
 * <>
 
+
 # Suggested Improvements
 
 1. *Avoid having two y-axis* as it can be confusing and misleading. Two
 different graphs could be created instead.
 
-1. *Too much visual clutter* can make it difficult to interpret the data.
+1. *Too much visual clutter* can make it difficult to interpret the data. Stick to a consistent color scheme and remove unnecessary elements.
 
-1. <>
+1. *Do not add flags to the graph* as they do not add value.
+
+1. *The growth paths divergence* can be better emphasized.
     
     
 # Implementation
@@ -64,15 +67,19 @@ different graphs could be created instead.
 
 ## Data
 
-*   Weekly counts of measles cases by state were obtained from Project
-    Tycho.[^panhuis_counts_2018] The data have missing weeks, which were
-    treated as zero in @fig-wsj-on-poster, potentially underestimating the
-    annual total. Instead, we calculated the weekly mean case count on the
-    basis of non-missing data only.
-*   Decennial U.S.\ census data for each state.[^stats_state_2023]
+*   Car production data by country/region were obtained from the International
+    Organization of Motor Vehicle Manufacturers (OICA) for the year
+    2017[^production_stats_by_region_2017]. 
+    
+*   Similarly, the oil production data
+    were obtained from the U.S. Energy Information
+    Administration[^crude_oil_stats]. However, the data was not bundled
+    together initially, so we had to manually combine and summarize the data
+    from the different sources.
 
-[^panhuis_counts_2018]: <https://doi.org/10.25337/T7/ptycho.v2.0/US.14189004>
-[^stats_state_2023]: <https://www.stats.indiana.edu/population/PopTotals/historic_counts_states.asp>
+[^production_stats_by_region_2017]: <https://www.oica.net/category/production-statistics/>
+
+[^crude_oil_stats]: <https://www.eia.gov/international/data/world#/?>
 
 
 ## Software
@@ -83,8 +90,6 @@ We used the Quarto publication framework and the R programming language, along w
 *   *tidyverse* for data transformation, including *ggplot2* for visualization
     based on the grammar of graphics
 *   *knitr* for dynamic document generation
-*   *zoo* for interpolating annual population data from the decennial
-    U.S.\ census
 
 ```{=typst}
 #v(2em)
@@ -94,8 +99,8 @@ We used the Quarto publication framework and the R programming language, along w
 
 ```{r}
 #| label: fig-ggplot
-#| fig-cap: "Revised visualization of measles incidence by state of the USA and
-#|  year."
+#| fig-cap: "Revised visualization of car production by country/region vs 
+#|  global liquid supplies."
 #| fig-width: 6.0
 #| fig-height: 5.8
 #| out-width: 100%
