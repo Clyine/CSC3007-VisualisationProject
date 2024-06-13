@@ -236,7 +236,7 @@ write.csv(new_cars_df_filtered, file = "processed_cars_filtered.csv", row.names 
 write.csv(new_oil_df_filtered, file = "processed_oil_filtered.csv", row.names = FALSE)
 ```
 
-#### Step 3: Get BRIC Oil Production
+#### Step 3: Get Oil Production Split by BRIC and Non-BRIC
 
 ```{r}
 # Filter BRIC countries
@@ -250,13 +250,30 @@ total_bric_oil <- bric_countries_oil %>%
 # Include first column as BRIC name
 total_bric_oil <- cbind("Country" = "BRIC", total_bric_oil)
 print(total_bric_oil)
+
+# Filter non-BRIC countries
+non_bric_countries_oil <- new_oil_df_filtered %>%
+  filter(!Country %in% c("BRAZIL", "RUSSIA", "INDIA", "CHINA"))
+
+# Total non-BRIC countries oil production
+total_non_bric_oil <- non_bric_countries_oil %>%
+  summarise(across(2:ncol(non_bric_countries_oil), sum, na.rm = TRUE))
+
+# Include first column as non-BRIC name
+total_non_bric_oil <- cbind("Country" = "non-BRIC", total_non_bric_oil)
+print(total_non_bric_oil)
+
+# Bind both tables
+total_oil_grouped = rbind(total_bric_oil, total_non_bric_oil)
+print(total_oil_grouped)
+
 ```
 
-#### Step 4: Write CSV Out for BRIC Oil data
+#### Step 4: Write CSV Out for BRIC and Non-BRIC Oil data
 
 ```{r}
 # Write CSV file for BRIC oil
-write.csv(total_bric_oil, file = "processed_oil_bric.csv", row.names = FALSE)
+write.csv(total_oil_grouped, file = "processed_oil_grouped.csv", row.names = FALSE)
 ```
 
 ## Data Visualization
@@ -266,10 +283,10 @@ write.csv(total_bric_oil, file = "processed_oil_bric.csv", row.names = FALSE)
 ```{r}
 
 # Plot the total oil production of BRIC countries
-total_bric_oil %>%
+total_oil_grouped %>%
   pivot_longer(cols = -Country, names_to = "Year", values_to = "Total_petroleum_and_other_liquids") %>%
   ggplot(aes(x = Year, y = Total_petroleum_and_other_liquids, color = Country, group = Country)) +
-  geom_line() +
+  geom_smooth(method = "loess", span=0.3, se = FALSE) +
   labs(title = "Total Petroleum and Other Liquids Production",
        subtitle = "By BRIC Countries and Year",
        x = "Year",
