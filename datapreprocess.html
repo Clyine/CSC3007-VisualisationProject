@@ -941,6 +941,226 @@ Figure&nbsp;1: Visualization of world car production growth compared to global o
 </div>
 </section>
 </section>
+<section id="new-data-visualization" class="level1">
+<h1>New Data Visualization</h1>
+<section id="step-1-extract-and-format-world-oil-supplies" class="level2">
+<h2 class="anchored" data-anchor-id="step-1-extract-and-format-world-oil-supplies">Step 1: Extract and Format World Oil Supplies</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract "WORLD" row from new_oil_df</span></span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>world_row <span class="ot">&lt;-</span> new_oil_df[new_oil_df<span class="sc">$</span>Country <span class="sc">==</span> <span class="st">"WORLD"</span>, ]</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Remove the first column (Country)</span></span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>world_data <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(world_row[<span class="sc">-</span><span class="dv">1</span>])</span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a data frame with "Oil Supplies" as Country and the extracted data</span></span>
+<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a>world_df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">Country =</span> <span class="st">"Oil Supplies"</span>, <span class="fu">t</span>(world_data))</span>
+<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-10"><a href="#cb43-10" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(world_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       Country X1 X2 X3 X4 X5 X6 X7      X8    X9     X10     X11      X12
+1 Oil Supplies NA NA NA NA NA NA NA 63987.8 60602 58100.1 57929.3 59563.46
+       X13      X14      X15      X16      X17      X18      X19      X20
+1 59156.13 61534.96 62101.27 64398.73 65524.91 66437.18 66338.85 66551.97
+       X21      X22     X23     X24      X25      X26      X27     X28      X29
+1 66337.05 68404.81 69738.2 71406.8 73756.48 74754.93 73443.89 75621.9 75764.24
+       X30     X31     X32      X33     X34      X35      X36      X37      X38
+1 75599.86 78497.8 83153.5 84672.89 85250.2 85474.13 86767.47 85716.23 87317.28
+       X39      X40      X41      X42      X43      X44      X45      X46
+1 88481.56 90769.36 91305.82 93899.47 96659.24 97108.92 97786.58 100415.8
+       X47      X48      X49      X50      X51 X52
+1 100161.6 93798.41 95682.74 100140.1 101820.4  NA</code></pre>
+</div>
+</div>
+</section>
+<section id="step-2-get-car-production-by-bric-and-non-bric" class="level2">
+<h2 class="anchored" data-anchor-id="step-2-get-car-production-by-bric-and-non-bric">Step 2: Get Car Production by BRIC and Non-BRIC</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Filter BRIC countries</span></span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>bric_countries_cars <span class="ot">&lt;-</span> new_cars_df_filtered <span class="sc">%&gt;%</span></span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Country <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"BRAZIL"</span>, <span class="st">"RUSSIA"</span>, <span class="st">"INDIA"</span>, <span class="st">"CHINA"</span>))</span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Total BRIC countries car production</span></span>
+<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a>total_bric_cars <span class="ot">&lt;-</span> bric_countries_cars <span class="sc">%&gt;%</span></span>
+<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="fu">across</span>(<span class="at">.cols =</span> <span class="dv">2</span><span class="sc">:</span><span class="fu">ncol</span>(bric_countries_cars), <span class="at">.fns =</span> <span class="sc">~</span><span class="fu">sum</span>(., <span class="at">na.rm =</span> <span class="cn">TRUE</span>)))</span>
+<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-9"><a href="#cb45-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Include first column as BRIC name</span></span>
+<span id="cb45-10"><a href="#cb45-10" aria-hidden="true" tabindex="-1"></a>total_bric_cars <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="st">"Country"</span> <span class="ot">=</span> <span class="st">"BRIC"</span>, total_bric_cars)</span>
+<span id="cb45-11"><a href="#cb45-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-12"><a href="#cb45-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Filter non-BRIC countries</span></span>
+<span id="cb45-13"><a href="#cb45-13" aria-hidden="true" tabindex="-1"></a>non_bric_countries_cars <span class="ot">&lt;-</span> new_cars_df_filtered <span class="sc">%&gt;%</span></span>
+<span id="cb45-14"><a href="#cb45-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span>Country <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"BRAZIL"</span>, <span class="st">"RUSSIA"</span>, <span class="st">"INDIA"</span>, <span class="st">"CHINA"</span>))</span>
+<span id="cb45-15"><a href="#cb45-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-16"><a href="#cb45-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Total non-BRIC countries car production</span></span>
+<span id="cb45-17"><a href="#cb45-17" aria-hidden="true" tabindex="-1"></a>total_non_bric_cars <span class="ot">&lt;-</span> non_bric_countries_cars <span class="sc">%&gt;%</span></span>
+<span id="cb45-18"><a href="#cb45-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="fu">across</span>(<span class="at">.cols =</span> <span class="dv">2</span><span class="sc">:</span><span class="fu">ncol</span>(non_bric_countries_cars), <span class="at">.fns =</span> <span class="sc">~</span><span class="fu">sum</span>(., <span class="at">na.rm =</span> <span class="cn">TRUE</span>)))</span>
+<span id="cb45-19"><a href="#cb45-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-20"><a href="#cb45-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Include first column as non-BRIC name</span></span>
+<span id="cb45-21"><a href="#cb45-21" aria-hidden="true" tabindex="-1"></a>total_non_bric_cars <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="st">"Country"</span> <span class="ot">=</span> <span class="st">"non-BRIC"</span>, total_non_bric_cars)</span>
+<span id="cb45-22"><a href="#cb45-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-23"><a href="#cb45-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Bind both tables</span></span>
+<span id="cb45-24"><a href="#cb45-24" aria-hidden="true" tabindex="-1"></a>processed_cars_grouped <span class="ot">&lt;-</span> <span class="fu">rbind</span>(total_bric_cars, total_non_bric_cars)</span>
+<span id="cb45-25"><a href="#cb45-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-26"><a href="#cb45-26" aria-hidden="true" tabindex="-1"></a><span class="co"># Write CSV file for Car Production (BRIC &amp; Non BRIC)</span></span>
+<span id="cb45-27"><a href="#cb45-27" aria-hidden="true" tabindex="-1"></a><span class="fu">write.csv</span>(processed_cars_grouped, <span class="at">file =</span> <span class="st">"processed_cars_grouped.csv"</span>, <span class="at">row.names =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="step-3-verify-both-dataframes-have-different-columns-based-on-years" class="level2">
+<h2 class="anchored" data-anchor-id="step-3-verify-both-dataframes-have-different-columns-based-on-years">Step 3: Verify both dataframes have different columns based on years</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(processed_cars_grouped)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "Country" "2023"    "2022"    "2021"    "2020"    "2019"    "2018"   
+ [8] "2017"    "2016"    "2015"    "2014"    "2013"    "2012"    "2011"   
+[15] "2010"    "2009"    "2008"    "2007"    "2006"    "2005"    "2004"   
+[22] "2003"    "2002"    "2001"    "2000"    "1999"   </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(world_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "Country" "X1"      "X2"      "X3"      "X4"      "X5"      "X6"     
+ [8] "X7"      "X8"      "X9"      "X10"     "X11"     "X12"     "X13"    
+[15] "X14"     "X15"     "X16"     "X17"     "X18"     "X19"     "X20"    
+[22] "X21"     "X22"     "X23"     "X24"     "X25"     "X26"     "X27"    
+[29] "X28"     "X29"     "X30"     "X31"     "X32"     "X33"     "X34"    
+[36] "X35"     "X36"     "X37"     "X38"     "X39"     "X40"     "X41"    
+[43] "X42"     "X43"     "X44"     "X45"     "X46"     "X47"     "X48"    
+[50] "X49"     "X50"     "X51"     "X52"    </code></pre>
+</div>
+</div>
+</section>
+<section id="step-4-create-dataframe-with-desired-years-for-world-supplies" class="level2">
+<h2 class="anchored" data-anchor-id="step-4-create-dataframe-with-desired-years-for-world-supplies">Step 4: Create dataframe with desired years for World Supplies</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>years <span class="ot">&lt;-</span> <span class="fu">as.character</span>(<span class="dv">1999</span><span class="sc">:</span><span class="dv">2023</span>)</span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>template <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="fu">matrix</span>(<span class="cn">NA</span>, <span class="at">nrow =</span> <span class="dv">1</span>, <span class="at">ncol =</span> <span class="fu">length</span>(years) <span class="sc">+</span> <span class="dv">1</span>))</span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(template) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Country"</span>, years)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="step-5-extract-world-data-and-select-columns-for-1999-to-2023" class="level2">
+<h2 class="anchored" data-anchor-id="step-5-extract-world-data-and-select-columns-for-1999-to-2023">Step 5: Extract world data and select columns for 1999 to 2023</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>world_selected <span class="ot">&lt;-</span> new_oil_df <span class="sc">%&gt;%</span></span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Country <span class="sc">==</span> <span class="st">"WORLD"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Country, <span class="fu">all_of</span>(years))</span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(world_selected)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  Country     1999    2000     2001     2002    2003    2004     2005    2006
+1   WORLD 73443.89 75621.9 75764.24 75599.86 78497.8 83153.5 84672.89 85250.2
+      2007     2008     2009     2010     2011     2012     2013     2014
+1 85474.13 86767.47 85716.23 87317.28 88481.56 90769.36 91305.82 93899.47
+      2015     2016     2017     2018     2019     2020     2021     2022
+1 96659.24 97108.92 97786.58 100415.8 100161.6 93798.41 95682.74 100140.1
+      2023
+1 101820.4</code></pre>
+</div>
+</div>
+</section>
+<section id="step-6-plot-car-production-and-oil-supplies" class="level2">
+<h2 class="anchored" data-anchor-id="step-6-plot-car-production-and-oil-supplies">Step 6: Plot Car Production and Oil Supplies</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>world_long <span class="ot">&lt;-</span> world_selected <span class="sc">%&gt;%</span></span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="sc">-</span>Country, <span class="at">names_to =</span> <span class="st">"Year"</span>, <span class="at">values_to =</span> <span class="st">"Oil_Supplies"</span>)</span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a>cars_long <span class="ot">&lt;-</span> processed_cars_grouped <span class="sc">%&gt;%</span></span>
+<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="sc">-</span>Country, <span class="at">names_to =</span> <span class="st">"Year"</span>, <span class="at">values_to =</span> <span class="st">"Car_Production"</span>)</span>
+<span id="cb53-6"><a href="#cb53-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-7"><a href="#cb53-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Normalize the data</span></span>
+<span id="cb53-8"><a href="#cb53-8" aria-hidden="true" tabindex="-1"></a>world_long <span class="ot">&lt;-</span> world_long <span class="sc">%&gt;%</span></span>
+<span id="cb53-9"><a href="#cb53-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Normalized_Oil_Supplies =</span> Oil_Supplies <span class="sc">/</span> <span class="fu">max</span>(Oil_Supplies))</span>
+<span id="cb53-10"><a href="#cb53-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-11"><a href="#cb53-11" aria-hidden="true" tabindex="-1"></a>cars_long <span class="ot">&lt;-</span> cars_long <span class="sc">%&gt;%</span></span>
+<span id="cb53-12"><a href="#cb53-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Normalized_Car_Production =</span> Car_Production <span class="sc">/</span> <span class="fu">max</span>(Car_Production))</span>
+<span id="cb53-13"><a href="#cb53-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-14"><a href="#cb53-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Combine the normalized data</span></span>
+<span id="cb53-15"><a href="#cb53-15" aria-hidden="true" tabindex="-1"></a>combined_normalized <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(</span>
+<span id="cb53-16"><a href="#cb53-16" aria-hidden="true" tabindex="-1"></a>  world_long <span class="sc">%&gt;%</span> <span class="fu">rename</span>(<span class="at">Value =</span> Normalized_Oil_Supplies) <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">Type =</span> <span class="st">"Normalized Oil Supplies"</span>),</span>
+<span id="cb53-17"><a href="#cb53-17" aria-hidden="true" tabindex="-1"></a>  cars_long <span class="sc">%&gt;%</span> <span class="fu">rename</span>(<span class="at">Value =</span> Normalized_Car_Production) <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">Type =</span> <span class="st">"Normalized Car Production"</span>)</span>
+<span id="cb53-18"><a href="#cb53-18" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb53-19"><a href="#cb53-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-20"><a href="#cb53-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-21"><a href="#cb53-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot</span></span>
+<span id="cb53-22"><a href="#cb53-22" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb53-23"><a href="#cb53-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_ribbon</span>(<span class="at">data =</span> world_long[world_long<span class="sc">$</span>Country <span class="sc">==</span> <span class="st">"WORLD"</span>, ], <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">as.numeric</span>(Year), <span class="at">ymin =</span> <span class="dv">0</span>, <span class="at">ymax =</span> Normalized_Oil_Supplies, <span class="at">fill =</span> Country), <span class="at">alpha =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
+<span id="cb53-24"><a href="#cb53-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_ribbon</span>(<span class="at">data =</span> world_long[world_long<span class="sc">$</span>Country <span class="sc">==</span> <span class="st">"non-BRIC"</span>, ], <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">as.numeric</span>(Year), <span class="at">ymin =</span> <span class="dv">0</span>, <span class="at">ymax =</span> Normalized_Oil_Supplies, <span class="at">fill =</span> Country), <span class="at">alpha =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
+<span id="cb53-25"><a href="#cb53-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_ribbon</span>(<span class="at">data =</span> world_long[world_long<span class="sc">$</span>Country <span class="sc">==</span> <span class="st">"BRIC"</span>, ], <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">as.numeric</span>(Year), <span class="at">ymin =</span> <span class="dv">0</span>, <span class="at">ymax =</span> Normalized_Oil_Supplies, <span class="at">fill =</span> Country), <span class="at">alpha =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
+<span id="cb53-26"><a href="#cb53-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-27"><a href="#cb53-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_ribbon</span>(<span class="at">data =</span> cars_long[cars_long<span class="sc">$</span>Country <span class="sc">==</span> <span class="st">"WORLD"</span>, ], <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">as.numeric</span>(Year), <span class="at">ymin =</span> <span class="dv">0</span>, <span class="at">ymax =</span> Normalized_Car_Production, <span class="at">fill =</span> Country), <span class="at">alpha =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
+<span id="cb53-28"><a href="#cb53-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_ribbon</span>(<span class="at">data =</span> cars_long[cars_long<span class="sc">$</span>Country <span class="sc">==</span> <span class="st">"non-BRIC"</span>, ], <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">as.numeric</span>(Year), <span class="at">ymin =</span> <span class="dv">0</span>, <span class="at">ymax =</span> Normalized_Car_Production, <span class="at">fill =</span> Country), <span class="at">alpha =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
+<span id="cb53-29"><a href="#cb53-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_ribbon</span>(<span class="at">data =</span> cars_long[cars_long<span class="sc">$</span>Country <span class="sc">==</span> <span class="st">"BRIC"</span>, ], <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">as.numeric</span>(Year), <span class="at">ymin =</span> <span class="dv">0</span>, <span class="at">ymax =</span> Normalized_Car_Production, <span class="at">fill =</span> Country), <span class="at">alpha =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
+<span id="cb53-30"><a href="#cb53-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-31"><a href="#cb53-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">data =</span> world_long, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">as.numeric</span>(Year), <span class="at">y =</span> Normalized_Oil_Supplies, <span class="at">color =</span> Country, <span class="at">linetype =</span> <span class="st">"Oil Supplies"</span>), <span class="at">linewidth =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb53-32"><a href="#cb53-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">data =</span> cars_long, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">as.numeric</span>(Year), <span class="at">y =</span> Normalized_Car_Production, <span class="at">color =</span> Country, <span class="at">linetype =</span> <span class="st">"Car Production"</span>), <span class="at">linewidth =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb53-33"><a href="#cb53-33" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb53-34"><a href="#cb53-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(</span>
+<span id="cb53-35"><a href="#cb53-35" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="st">"Normalized Values"</span>,</span>
+<span id="cb53-36"><a href="#cb53-36" aria-hidden="true" tabindex="-1"></a>    <span class="at">sec.axis =</span> <span class="fu">sec_axis</span>(<span class="sc">~</span> . <span class="sc">*</span> <span class="fu">max</span>(cars_long<span class="sc">$</span>Car_Production), <span class="at">name =</span> <span class="st">"Car Production"</span>)</span>
+<span id="cb53-37"><a href="#cb53-37" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb53-38"><a href="#cb53-38" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb53-39"><a href="#cb53-39" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Normalized World Oil Supplies and Car Production (BRIC and Non-BRIC)"</span>,</span>
+<span id="cb53-40"><a href="#cb53-40" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Year"</span>,</span>
+<span id="cb53-41"><a href="#cb53-41" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">"Country"</span>,</span>
+<span id="cb53-42"><a href="#cb53-42" aria-hidden="true" tabindex="-1"></a>    <span class="at">linetype =</span> <span class="st">"Type"</span>,</span>
+<span id="cb53-43"><a href="#cb53-43" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">"Country"</span>,</span>
+<span id="cb53-44"><a href="#cb53-44" aria-hidden="true" tabindex="-1"></a>    <span class="at">caption =</span> <span class="st">"Source: OICA, EIA"</span></span>
+<span id="cb53-45"><a href="#cb53-45" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb53-46"><a href="#cb53-46" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="datapreprocess_files/figure-html/unnamed-chunk-25-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="percentage-change-in-oil-production-from-baseline" class="level2">
+<h2 class="anchored" data-anchor-id="percentage-change-in-oil-production-from-baseline">Percentage Change in Oil Production from Baseline</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Define the baseline year</span></span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>base_year <span class="ot">&lt;-</span> <span class="fu">min</span>(common_years)</span>
+<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate percentage change for car production</span></span>
+<span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a>total_oil_grouped_pct_change <span class="ot">&lt;-</span> total_oil_grouped <span class="sc">%&gt;%</span></span>
+<span id="cb54-6"><a href="#cb54-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="sc">-</span>Country, <span class="at">names_to =</span> <span class="st">"Year"</span>, <span class="at">values_to =</span> <span class="st">"Total_petroleum_and_other_liquids"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb54-7"><a href="#cb54-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Year =</span> <span class="fu">as.numeric</span>(Year)) <span class="sc">%&gt;%</span></span>
+<span id="cb54-8"><a href="#cb54-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Country) <span class="sc">%&gt;%</span></span>
+<span id="cb54-9"><a href="#cb54-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Percent_Change =</span> (Total_petroleum_and_other_liquids <span class="sc">-</span> Total_petroleum_and_other_liquids[Year <span class="sc">==</span> base_year]) <span class="sc">/</span> Total_petroleum_and_other_liquids[Year <span class="sc">==</span> base_year] <span class="sc">*</span> <span class="dv">100</span>)</span>
+<span id="cb54-10"><a href="#cb54-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-11"><a href="#cb54-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate percentage change for world oil supplies</span></span>
+<span id="cb54-12"><a href="#cb54-12" aria-hidden="true" tabindex="-1"></a>world_selected_long <span class="ot">&lt;-</span> world_selected <span class="sc">%&gt;%</span></span>
+<span id="cb54-13"><a href="#cb54-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="sc">-</span>Country, <span class="at">names_to =</span> <span class="st">"Year"</span>, <span class="at">values_to =</span> <span class="st">"World_Supplies"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb54-14"><a href="#cb54-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Year =</span> <span class="fu">as.numeric</span>(Year)) <span class="sc">%&gt;%</span></span>
+<span id="cb54-15"><a href="#cb54-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Country) <span class="sc">%&gt;%</span></span>
+<span id="cb54-16"><a href="#cb54-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Percent_Change =</span> (World_Supplies <span class="sc">-</span> World_Supplies[Year <span class="sc">==</span> base_year]) <span class="sc">/</span> World_Supplies[Year <span class="sc">==</span> base_year] <span class="sc">*</span> <span class="dv">100</span>)</span>
+<span id="cb54-17"><a href="#cb54-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-18"><a href="#cb54-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Combine the data frames</span></span>
+<span id="cb54-19"><a href="#cb54-19" aria-hidden="true" tabindex="-1"></a>combined_pct_change <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(</span>
+<span id="cb54-20"><a href="#cb54-20" aria-hidden="true" tabindex="-1"></a>  total_oil_grouped_pct_change <span class="sc">%&gt;%</span> <span class="fu">select</span>(Country, Year, Percent_Change),</span>
+<span id="cb54-21"><a href="#cb54-21" aria-hidden="true" tabindex="-1"></a>  world_selected_long <span class="sc">%&gt;%</span> <span class="fu">select</span>(Country, Year, Percent_Change)</span>
+<span id="cb54-22"><a href="#cb54-22" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb54-23"><a href="#cb54-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-24"><a href="#cb54-24" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the combined data</span></span>
+<span id="cb54-25"><a href="#cb54-25" aria-hidden="true" tabindex="-1"></a>combined_pct_change <span class="sc">%&gt;%</span></span>
+<span id="cb54-26"><a href="#cb54-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> Year, <span class="at">y =</span> Percent_Change, <span class="at">color =</span> Country, <span class="at">group =</span> Country)) <span class="sc">+</span></span>
+<span id="cb54-27"><a href="#cb54-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">linewidth =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb54-28"><a href="#cb54-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb54-29"><a href="#cb54-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Percentage Change in Total Petroleum and Other Liquids Production"</span>,</span>
+<span id="cb54-30"><a href="#cb54-30" aria-hidden="true" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="fu">paste</span>(<span class="st">"From Baseline Year"</span>, base_year),</span>
+<span id="cb54-31"><a href="#cb54-31" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Year"</span>,</span>
+<span id="cb54-32"><a href="#cb54-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Percentage Change (%)"</span>,</span>
+<span id="cb54-33"><a href="#cb54-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">caption =</span> <span class="st">"Source: EIA"</span></span>
+<span id="cb54-34"><a href="#cb54-34" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb54-35"><a href="#cb54-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="datapreprocess_files/figure-html/unnamed-chunk-26-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
 
 </main>
 <!-- /main column -->
