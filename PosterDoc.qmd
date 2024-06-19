@@ -27,7 +27,7 @@ library(knitr)
 
 CrudeOilPeak[^crude_oil_peak], a website that tracks global oil production and consumption as well as its impact on the economy, states that over the past decade, global car production has surged by 52%, predominantly driven by China's growth. In contrast, oil supplies have only increased by 16%[^car_three_times_oil]. This disparity highlights a significant challenge: the demand for cars is outpacing the available oil supply.
 
-To further illustrate this issue, they have created a visualization that compares the growth in car production by country/region against the growth in global liquid supplies (@fig-on-poster). We found the visualization to be severly lacking and messy, and believe that it can be improved to be more visually appealing and easier to digest.  
+To further illustrate this issue, they have created a visualization that compares the growth in car production by country/region against the growth in global liquid supplies (@fig-on-poster). We found the visualization to be severely lacking and messy, and believe that it can be improved to be more visually appealing and easier to digest.  
 
 [^crude_oil_peak]: <https://crudeoilpeak.info>
 
@@ -47,7 +47,9 @@ knitr::include_graphics("previous_visualisation.jpg")
 
 # Strengths
 
-* <>
+1. High amount of information shown on the graph. Users can pinpoint and gather data specific to each country.
+1. Area filling with country flags make it possible to identity country in question without referencing the plot legends.
+1. 
 
 
 # Suggested Improvements

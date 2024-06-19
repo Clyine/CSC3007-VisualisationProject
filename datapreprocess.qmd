@@ -286,7 +286,8 @@ write.csv(total_oil_grouped, file = "processed_oil_grouped.csv", row.names = FAL
 total_oil_grouped %>%
   pivot_longer(cols = -Country, names_to = "Year", values_to = "Total_petroleum_and_other_liquids") %>%
   ggplot(aes(x = Year, y = Total_petroleum_and_other_liquids, color = Country, group = Country)) +
-  geom_smooth(method = "loess", span=0.3, se = FALSE) +
+  geom_line() +
+  #geom_smooth(method = "loess", span=0.3, se = FALSE) +
   labs(title = "Total Petroleum and Other Liquids Production",
        subtitle = "By BRIC Countries and Year",
        x = "Year",
@@ -294,7 +295,9 @@ total_oil_grouped %>%
        caption = "Source: EIA") +
   theme_minimal()
 ```
-
+```{r}
+plot_cars_filtered
+```
 ### Plotting the Total Cars Production of All Countries
 
 ```{R}
