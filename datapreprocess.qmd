@@ -278,6 +278,8 @@ print(total_non_bric_oil)
 
 # Bind both tables
 total_oil_grouped = rbind(total_bric_oil, total_non_bric_oil)
+
+  
 print(total_oil_grouped)
 ```
 
@@ -288,37 +290,54 @@ print(total_oil_grouped)
 write.csv(total_oil_grouped, file = "processed_oil_grouped.csv", row.names = FALSE)
 ```
 
+
+```{r}
+processed_cars_grouped |>
+  mutate(Class = "Cars")
+total_oil_grouped |>
+  mutate(Class = "Oil")
+
+all_data_grouped = rbind(processed_cars_grouped |> mutate(Class = "Cars"), total_oil_grouped |> mutate(Class = "Oil"))
+all_data_grouped |>
+  pivot_longer(cols = !c(Country,Class), names_to = "Year", values_to = "Total") |>
+  pivot_wider(names_from = Class, values_from = Total)
+```
+
+
 # Data Visualization
 
-## Total Oil Production of BRIC and Non-BRIC Countries
-
+## Total Oil and Car Production of BRIC and Non-BRIC Countries
 ```{r}
-# Plot the total oil production of BRIC and Non-BRIC countries
-total_oil_grouped %>%
-  pivot_longer(cols = -Country, names_to = "Year", values_to = "Total_petroleum_and_other_liquids") %>%
-  ggplot(aes(x = Year, y = Total_petroleum_and_other_liquids, color = Country, group = Country)) +
-<<<<<<< HEAD
-  geom_line() +
-  #geom_smooth(method = "loess", span=0.3, se = FALSE) +
-=======
-  geom_line(linewidth = 1) +
->>>>>>> 559bb2f72007dc5e74069bc42fafa6fcd4de9853
-  labs(title = "Total Petroleum and Other Liquids Production",
+## Total Oil and Car Production of BRIC and Non-BRIC Countries
+total_oil = total_oil_grouped |>
+  pivot_longer(cols = !c(Country), names_to = "Year", values_to = "Total") |>
+  group_by(Year) |>
+  summarise(Sum=sum(Total) )
+
+total_car = all_data_grouped %>%
+  pivot_longer(cols = !c(Country, Class), names_to = "Year", values_to = "Total") %>%
+  pivot_wider(names_from = Class, values_from = Total)
+
+print(total_oil)
+
+  ggplot() +
+  geom_area(data=total_car, aes(x=Year, y=Cars, fill=Country, group=Country), alpha = 0.5) +
+  geom_line(data=total_oil, aes(x=Year, y=Sum*1500, group=1), size=1) +
+  labs(title = "Total Car Production",
        subtitle = "By BRIC & non-BRIC Countries and Year",
        x = "Year",
-       y = "Total Petroleum and Other Liquids (Mb/d)",
+       y = "Total Car Production (Millions/M)",
        caption = "Source: EIA") +
+  scale_y_continuous(labels = unit_format(unit = "M", scale = 1e-6),
+                     sec.axis = sec_axis(~ . / 1500, name = "Oil (scaled)")) +
+  scale_x_discrete(breaks = function(x){x[c(TRUE, FALSE)]}) +
+
   theme_minimal()
-```
-<<<<<<< HEAD
-```{r}
-plot_cars_filtered
 ```
 ### Plotting the Total Cars Production of All Countries
 =======
 
 ## Total Cars Production of All Countries
->>>>>>> 559bb2f72007dc5e74069bc42fafa6fcd4de9853
 
 ```{R}
 # Pivot wider on the cars filtered dataframe
