@@ -1,20 +1,32 @@
 ---
-title: "Data Preprocessing"
+title: "Vizualizing Crude Oil Analysis: World car production grows 3 times faster than global oil supplies"
+subtitle: Data Preparation
 author: "Jingquan Chen, John Wang, Keng Li Chia, Jourdan Lim, Perpetua Raj, Joey Tan"
 format: html
 editor: visual
 ---
 
-# Improving Data Visualization on Crude Oil Analysis: World car production grows 3 times faster than global oil supplies
+# Introduction
 
-## Imports
+This document contains the data engineering required to reconstruct and improve the plot by @Matt, shown in @fig-1, depicting the world car production growth compared to global oil supplies of various countries from the year 1999 to 2012.
 
-```{r}
+The codes below requires the following packages:
+
+```{r message=FALSE}
 library(tidyverse)
 library(dplyr)
 library(gt)
 library(ggplot2)
 library(scales)
+library(knitr)
+```
+
+```{r}
+#| label: fig-1
+#| echo: false
+#| fig.cap: "Visualization of world car production growth compared to global oil supplies from 1999 to 2012 by @Matt."
+
+include_graphics("previous_visualisation.jpg")
 ```
 
 ## Visualization Source
@@ -42,14 +54,14 @@ cars_raw %>% head()
 oil_raw %>% head()
 ```
 
-## Data Cleaning & Preprocessing
+# Data Cleaning & Preprocessing
 
-### Preprocess Oil Data
+## Preprocess Oil Data
 
-#### Step 1: Get Countries
+### Step 1: Get Countries
 
 ```{r}
-# Create sequence of row indices in multiplies of 8 to get countries
+# Create sequence of row indices in multiplies of 8 to get countries (1, 9, 17, ..., 1849)
 countries_indices <- seq(1, nrow(oil_raw), by = 8)
 
 # Select every 8th row
@@ -62,7 +74,7 @@ countries_oil <- countries_selected[, 1]
 print(countries_oil)
 ```
 
-#### Step 2: Get Years
+### Step 2: Get Years
 
 ```{r}
 # Get all the column names, for years
@@ -75,7 +87,7 @@ years_oil <- as.numeric(gsub("X", "", years_selected))
 print(years_oil)
 ```
 
-#### Step 3: Get Petroleum Data from Total_Petroleum_and_Other_Liquids Column
+### Step 3: Get Petroleum Data from "Total petroleum and other liquids (Mb/d)" Column
 
 ```{r}
 # Create indices
@@ -84,11 +96,11 @@ total_petroleum_indices <- seq(3, nrow(oil_raw), by = 8)
 # Get the data
 petroleum_selected <- oil_raw[total_petroleum_indices, ]
 
-# Display the data
-print(petroleum_selected)
+# Display petrolum data head() 
+print(head(petroleum_selected))
 ```
 
-#### Step 4: Create new dataframe with Countries, Years, and Total Petroleum and Other Liquids
+### Step 4: Create new dataframe with Countries, Years, and Total Petroleum and Other Liquids
 
 ```{r}
 
@@ -104,8 +116,8 @@ colnames(new_oil_df) <- c("Country", years_oil)
 # Select columns to convert to numeric
 columns_to_convert <- names(new_oil_df)[-1]
 
-# Convert all columns to numeric
-new_oil_df[, columns_to_convert] <- lapply(new_oil_df[, columns_to_convert], as.numeric)
+# Convert columns to numeric, ignoring NA values
+suppressWarnings(new_oil_df[, columns_to_convert] <- lapply(new_oil_df[, columns_to_convert], as.numeric))
 
 # Convert first row country names to all upper case
 new_oil_df[, 1] <- toupper(new_oil_df[, 1])
@@ -116,13 +128,13 @@ rownames(new_oil_df) <- NULL
 # Write CSV file
 write.csv(new_oil_df, file = "processed_oil_all.csv", row.names = FALSE)
 
-# Display new data
-print(new_oil_df)
+# Display new oil dataframe head()
+print(head(new_oil_df))
 ```
 
-### Preprocess Cars Data
+## Preprocess Cars Data
 
-#### Step 1: Process Countries Names, Remove Datarows with ""
+### Step 1: Process Countries Names, Remove Datarows with Empty Strings ("")
 
 ```{r}
 # Create new dataframe
@@ -140,21 +152,21 @@ rows_to_keep <- new_cars_df[, 1] != ""
 # Subset the data frame to keep rows where the data in the first column is not ""
 new_cars_df <- new_cars_df[rows_to_keep, ]
 
-# Display new dataframe
-print(new_cars_df)
+# Display new cars dataframe head() 
+print(head(new_cars_df))
 ```
 
-#### Step 2: Get Unique Countries
+### Step 2: Get Unique Countries
 
 ```{r}
 # Get unique values in column 1
 unique_countries <- unique(new_cars_df[,1])
 
-# Print Unique Countries
+# Print unique countries
 print(unique_countries)
 ```
 
-#### Step 3: Change values to match common country names
+### Step 3: Change values to Match Common Country Names
 
 ```{r}
 # Change values in the first column from "CZECH REP." to "CZECH REPUBLIC"
@@ -167,7 +179,7 @@ unique_countries <- unique(new_cars_df[,1])
 print(unique_countries)
 ```
 
-#### Step 4: Pivot wider on year, concatenate vertically on data on common country names, change column data type to numeric
+### Step 4: Pivot Wider on Year, Concatenate Vertically on Data on Common Country Names, Change Column Data Type to Numeric
 
 ```{r}
 # Get all column headers
@@ -185,7 +197,7 @@ new_cars_df[, -1] <- lapply(new_cars_df[, -1], function(x) as.numeric(gsub("[ ,]
 # Concatenate vertically the columns where they have the same country.region name
 new_cars_df <- new_cars_df %>%
   group_by(Country.Region) %>%
-  summarise(across(, ~sum(.x, na.rm = TRUE)))
+  summarise(across(.cols = everything(), .fns = ~sum(.x, na.rm = TRUE)))
 
 # Rename first column to Country
 colnames(new_cars_df)[1] <- "Country"
@@ -193,13 +205,13 @@ colnames(new_cars_df)[1] <- "Country"
 # Write CSV file
 write.csv(new_cars_df, file = "processed_cars_all.csv", row.names = FALSE)
 
-# Display new dataframe
-print(new_cars_df)
+# Display new cars dataframe head()
+print(head(new_cars_df))
 ```
 
-### Data Summarisation: Get Common Data from both Cars and Oil Data
+## Data Summarisation: Get Common Data from both Cars and Oil Data
 
-#### Step 1: Get Common Countries, Years
+### Step 1: Get Common Countries and Years
 
 ```{r}
 # Get Common Countries
@@ -211,7 +223,7 @@ common_years <- intersect(colnames(new_cars_df)[-1], colnames(new_oil_df)[-1])
 print(common_years)
 ```
 
-#### Step 2: Get Common Data
+### Step 2: Get Common Data
 
 ```{r}
 # Filter data based on common countries and common years
@@ -223,10 +235,10 @@ print(new_cars_df_filtered)
 new_oil_df_filtered <- new_oil_df %>%
   filter(Country %in% common_countries) %>%
   select(all_of(c("Country", common_years)))
-print(new_oil_df_filtered)
+print(head(new_oil_df_filtered))
 ```
 
-#### Step 3: Write CSV Out for filtered data
+### Step 3: Write CSV Out for Filtered Data
 
 ```{r}
 # Write CSV file for cars
@@ -236,7 +248,7 @@ write.csv(new_cars_df_filtered, file = "processed_cars_filtered.csv", row.names 
 write.csv(new_oil_df_filtered, file = "processed_oil_filtered.csv", row.names = FALSE)
 ```
 
-#### Step 3: Get Oil Production Split by BRIC and Non-BRIC
+### Step 3: Get Oil Production Split by BRIC and Non-BRIC
 
 ```{r}
 # Filter BRIC countries
@@ -245,7 +257,8 @@ bric_countries_oil <- new_oil_df_filtered %>%
 
 # Total BRIC countries oil production
 total_bric_oil <- bric_countries_oil %>%
-  summarise(across(2:ncol(bric_countries_oil), sum, na.rm = TRUE))
+  summarise(across(.cols = 2:ncol(bric_countries_oil), .fns = ~sum(., na.rm = TRUE)))
+print(total_bric_oil)
 
 # Include first column as BRIC name
 total_bric_oil <- cbind("Country" = "BRIC", total_bric_oil)
@@ -257,7 +270,7 @@ non_bric_countries_oil <- new_oil_df_filtered %>%
 
 # Total non-BRIC countries oil production
 total_non_bric_oil <- non_bric_countries_oil %>%
-  summarise(across(2:ncol(non_bric_countries_oil), sum, na.rm = TRUE))
+  summarise(across(.cols = 2:ncol(non_bric_countries_oil), .fns = ~sum(., na.rm = TRUE)))
 
 # Include first column as non-BRIC name
 total_non_bric_oil <- cbind("Country" = "non-BRIC", total_non_bric_oil)
@@ -266,39 +279,46 @@ print(total_non_bric_oil)
 # Bind both tables
 total_oil_grouped = rbind(total_bric_oil, total_non_bric_oil)
 print(total_oil_grouped)
-
 ```
 
-#### Step 4: Write CSV Out for BRIC and Non-BRIC Oil data
+### Step 4: Write CSV Out for BRIC and Non-BRIC Oil Data
 
 ```{r}
 # Write CSV file for BRIC oil
 write.csv(total_oil_grouped, file = "processed_oil_grouped.csv", row.names = FALSE)
 ```
 
-## Data Visualization
+# Data Visualization
 
-### Plotting the Total Oil Production of BRIC Countries
+## Total Oil Production of BRIC and Non-BRIC Countries
 
 ```{r}
-
-# Plot the total oil production of BRIC countries
+# Plot the total oil production of BRIC and Non-BRIC countries
 total_oil_grouped %>%
   pivot_longer(cols = -Country, names_to = "Year", values_to = "Total_petroleum_and_other_liquids") %>%
   ggplot(aes(x = Year, y = Total_petroleum_and_other_liquids, color = Country, group = Country)) +
+<<<<<<< HEAD
   geom_line() +
   #geom_smooth(method = "loess", span=0.3, se = FALSE) +
+=======
+  geom_line(linewidth = 1) +
+>>>>>>> 559bb2f72007dc5e74069bc42fafa6fcd4de9853
   labs(title = "Total Petroleum and Other Liquids Production",
-       subtitle = "By BRIC Countries and Year",
+       subtitle = "By BRIC & non-BRIC Countries and Year",
        x = "Year",
        y = "Total Petroleum and Other Liquids (Mb/d)",
        caption = "Source: EIA") +
   theme_minimal()
 ```
+<<<<<<< HEAD
 ```{r}
 plot_cars_filtered
 ```
 ### Plotting the Total Cars Production of All Countries
+=======
+
+## Total Cars Production of All Countries
+>>>>>>> 559bb2f72007dc5e74069bc42fafa6fcd4de9853
 
 ```{R}
 # Pivot wider on the cars filtered dataframe
@@ -318,3 +338,169 @@ plot_cars_filtered %>%
   theme_minimal() +
   scale_y_continuous(labels = comma) # Format y-axis from scientic notation to comma
 ```
+
+# New Data Visualization
+
+## Step 1: Extract and Format World Oil Supplies
+
+```{r}
+# Extract "WORLD" row from new_oil_df
+world_row <- new_oil_df[new_oil_df$Country == "WORLD", ]
+
+# Remove the first column (Country)
+world_data <- as.numeric(world_row[-1])
+
+# Create a data frame with "Oil Supplies" as Country and the extracted data
+world_df <- data.frame(Country = "Oil Supplies", t(world_data))
+
+print(world_df)
+```
+
+## Step 2: Get Car Production by BRIC and Non-BRIC
+
+```{r}
+# Filter BRIC countries
+bric_countries_cars <- new_cars_df_filtered %>%
+  filter(Country %in% c("BRAZIL", "RUSSIA", "INDIA", "CHINA"))
+
+# Total BRIC countries car production
+total_bric_cars <- bric_countries_cars %>%
+  summarise(across(.cols = 2:ncol(bric_countries_cars), .fns = ~sum(., na.rm = TRUE)))
+
+# Include first column as BRIC name
+total_bric_cars <- cbind("Country" = "BRIC", total_bric_cars)
+
+# Filter non-BRIC countries
+non_bric_countries_cars <- new_cars_df_filtered %>%
+  filter(!Country %in% c("BRAZIL", "RUSSIA", "INDIA", "CHINA"))
+
+# Total non-BRIC countries car production
+total_non_bric_cars <- non_bric_countries_cars %>%
+  summarise(across(.cols = 2:ncol(non_bric_countries_cars), .fns = ~sum(., na.rm = TRUE)))
+
+# Include first column as non-BRIC name
+total_non_bric_cars <- cbind("Country" = "non-BRIC", total_non_bric_cars)
+
+# Bind both tables
+processed_cars_grouped <- rbind(total_bric_cars, total_non_bric_cars)
+
+# Write CSV file for Car Production (BRIC & Non BRIC)
+write.csv(processed_cars_grouped, file = "processed_cars_grouped.csv", row.names = FALSE)
+```
+
+## Step 3: Verify both dataframes have different columns based on years
+
+```{r}
+colnames(processed_cars_grouped)
+colnames(world_df)
+```
+
+## Step 4: Create dataframe with desired years for World Supplies
+
+```{r} 
+years <- as.character(1999:2023)
+template <- data.frame(matrix(NA, nrow = 1, ncol = length(years) + 1))
+colnames(template) <- c("Country", years)
+```
+
+## Step 5: Extract world data and select columns for 1999 to 2023
+
+```{r}
+world_selected <- new_oil_df %>%
+  filter(Country == "WORLD") %>%
+  select(Country, all_of(years))
+
+print(world_selected)
+```
+
+## Step 6: Plot Car Production and Oil Supplies
+```{r}
+world_long <- world_selected %>%
+  pivot_longer(-Country, names_to = "Year", values_to = "Oil_Supplies")
+
+cars_long <- processed_cars_grouped %>%
+  pivot_longer(-Country, names_to = "Year", values_to = "Car_Production")
+
+# Normalize the data
+world_long <- world_long %>%
+  mutate(Normalized_Oil_Supplies = Oil_Supplies / max(Oil_Supplies))
+
+cars_long <- cars_long %>%
+  mutate(Normalized_Car_Production = Car_Production / max(Car_Production))
+
+# Combine the normalized data
+combined_normalized <- bind_rows(
+  world_long %>% rename(Value = Normalized_Oil_Supplies) %>% mutate(Type = "Normalized Oil Supplies"),
+  cars_long %>% rename(Value = Normalized_Car_Production) %>% mutate(Type = "Normalized Car Production")
+)
+
+
+# Plot
+ggplot() +
+  geom_ribbon(data = world_long[world_long$Country == "WORLD", ], aes(x = as.numeric(Year), ymin = 0, ymax = Normalized_Oil_Supplies, fill = Country), alpha = 0.2) +
+  geom_ribbon(data = world_long[world_long$Country == "non-BRIC", ], aes(x = as.numeric(Year), ymin = 0, ymax = Normalized_Oil_Supplies, fill = Country), alpha = 0.2) +
+  geom_ribbon(data = world_long[world_long$Country == "BRIC", ], aes(x = as.numeric(Year), ymin = 0, ymax = Normalized_Oil_Supplies, fill = Country), alpha = 0.2) +
+
+  geom_ribbon(data = cars_long[cars_long$Country == "WORLD", ], aes(x = as.numeric(Year), ymin = 0, ymax = Normalized_Car_Production, fill = Country), alpha = 0.2) +
+  geom_ribbon(data = cars_long[cars_long$Country == "non-BRIC", ], aes(x = as.numeric(Year), ymin = 0, ymax = Normalized_Car_Production, fill = Country), alpha = 0.2) +
+  geom_ribbon(data = cars_long[cars_long$Country == "BRIC", ], aes(x = as.numeric(Year), ymin = 0, ymax = Normalized_Car_Production, fill = Country), alpha = 0.2) +
+
+  geom_line(data = world_long, aes(x = as.numeric(Year), y = Normalized_Oil_Supplies, color = Country, linetype = "Oil Supplies"), linewidth = 1) +
+  geom_line(data = cars_long, aes(x = as.numeric(Year), y = Normalized_Car_Production, color = Country, linetype = "Car Production"), linewidth = 1) +
+  
+  scale_y_continuous(
+    name = "Normalized Values",
+    sec.axis = sec_axis(~ . * max(cars_long$Car_Production), name = "Car Production")
+  ) +
+  labs(
+    title = "Normalized World Oil Supplies and Car Production (BRIC and Non-BRIC)",
+    x = "Year",
+    color = "Country",
+    linetype = "Type",
+    fill = "Country",
+    caption = "Source: OICA, EIA"
+  ) +
+  theme_minimal()
+```
+
+
+## Percentage Change in Oil Production from Baseline
+
+```{r}
+# Define the baseline year
+base_year <- min(common_years)
+
+# Calculate percentage change for car production
+total_oil_grouped_pct_change <- total_oil_grouped %>%
+  pivot_longer(cols = -Country, names_to = "Year", values_to = "Total_petroleum_and_other_liquids") %>%
+  mutate(Year = as.numeric(Year)) %>%
+  group_by(Country) %>%
+  mutate(Percent_Change = (Total_petroleum_and_other_liquids - Total_petroleum_and_other_liquids[Year == base_year]) / Total_petroleum_and_other_liquids[Year == base_year] * 100)
+
+# Calculate percentage change for world oil supplies
+world_selected_long <- world_selected %>%
+  pivot_longer(cols = -Country, names_to = "Year", values_to = "World_Supplies") %>%
+  mutate(Year = as.numeric(Year)) %>%
+  group_by(Country) %>%
+  mutate(Percent_Change = (World_Supplies - World_Supplies[Year == base_year]) / World_Supplies[Year == base_year] * 100)
+
+# Combine the data frames
+combined_pct_change <- bind_rows(
+  total_oil_grouped_pct_change %>% select(Country, Year, Percent_Change),
+  world_selected_long %>% select(Country, Year, Percent_Change)
+)
+
+# Plot the combined data
+combined_pct_change %>%
+  ggplot(aes(x = Year, y = Percent_Change, color = Country, group = Country)) +
+  geom_line(linewidth = 1) +
+  labs(
+    title = "Percentage Change in Total Petroleum and Other Liquids Production",
+    subtitle = paste("From Baseline Year", base_year),
+    x = "Year",
+    y = "Percentage Change (%)",
+    caption = "Source: EIA"
+  ) +
+  theme_minimal()
+```
+
