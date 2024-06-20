@@ -4,6 +4,10 @@ subtitle: Data Preparation
 author: "Jingquan Chen, John Wang, Keng Li Chia, Jourdan Lim, Perpetua Raj, Joey Tan"
 format: html
 editor: visual
+output:
+  pdf_document:
+    fig_height: 8  # Specify plot height in inches
+    fig_width: 8   # Specify plot width in inches
 ---
 
 # Introduction
@@ -248,7 +252,7 @@ write.csv(new_cars_df_filtered, file = "processed_cars_filtered.csv", row.names 
 write.csv(new_oil_df_filtered, file = "processed_oil_filtered.csv", row.names = FALSE)
 ```
 
-### Step 3: Get Oil Production Split by BRIC and Non-BRIC
+### Step 4: Get Oil Production Split by BRIC and Non-BRIC
 
 ```{r}
 # Filter BRIC countries
@@ -258,11 +262,9 @@ bric_countries_oil <- new_oil_df_filtered %>%
 # Total BRIC countries oil production
 total_bric_oil <- bric_countries_oil %>%
   summarise(across(.cols = 2:ncol(bric_countries_oil), .fns = ~sum(., na.rm = TRUE)))
-print(total_bric_oil)
 
 # Include first column as BRIC name
 total_bric_oil <- cbind("Country" = "BRIC", total_bric_oil)
-print(total_bric_oil)
 
 # Filter non-BRIC countries
 non_bric_countries_oil <- new_oil_df_filtered %>%
@@ -274,7 +276,6 @@ total_non_bric_oil <- non_bric_countries_oil %>%
 
 # Include first column as non-BRIC name
 total_non_bric_oil <- cbind("Country" = "non-BRIC", total_non_bric_oil)
-print(total_non_bric_oil)
 
 # Bind both tables
 total_oil_grouped = rbind(total_bric_oil, total_non_bric_oil)
@@ -282,100 +283,7 @@ total_oil_grouped = rbind(total_bric_oil, total_non_bric_oil)
   
 print(total_oil_grouped)
 ```
-
-### Step 4: Write CSV Out for BRIC and Non-BRIC Oil Data
-
-```{r}
-# Write CSV file for BRIC oil
-write.csv(total_oil_grouped, file = "processed_oil_grouped.csv", row.names = FALSE)
-```
-
-
-```{r}
-processed_cars_grouped |>
-  mutate(Class = "Cars")
-total_oil_grouped |>
-  mutate(Class = "Oil")
-
-all_data_grouped = rbind(processed_cars_grouped |> mutate(Class = "Cars"), total_oil_grouped |> mutate(Class = "Oil"))
-all_data_grouped |>
-  pivot_longer(cols = !c(Country,Class), names_to = "Year", values_to = "Total") |>
-  pivot_wider(names_from = Class, values_from = Total)
-```
-
-
-# Data Visualization
-
-## Total Oil and Car Production of BRIC and Non-BRIC Countries
-```{r}
-## Total Oil and Car Production of BRIC and Non-BRIC Countries
-total_oil = total_oil_grouped |>
-  pivot_longer(cols = !c(Country), names_to = "Year", values_to = "Total") |>
-  group_by(Year) |>
-  summarise(Sum=sum(Total) )
-
-total_car = all_data_grouped %>%
-  pivot_longer(cols = !c(Country, Class), names_to = "Year", values_to = "Total") %>%
-  pivot_wider(names_from = Class, values_from = Total)
-
-print(total_oil)
-
-  ggplot() +
-  geom_area(data=total_car, aes(x=Year, y=Cars, fill=Country, group=Country), alpha = 0.5) +
-  geom_line(data=total_oil, aes(x=Year, y=Sum*1500, group=1), size=1) +
-  labs(title = "Total Car Production",
-       subtitle = "By BRIC & non-BRIC Countries and Year",
-       x = "Year",
-       y = "Total Car Production (Millions/M)",
-       caption = "Source: EIA") +
-  scale_y_continuous(labels = unit_format(unit = "M", scale = 1e-6),
-                     sec.axis = sec_axis(~ . / 1500, name = "Oil (scaled)")) +
-  scale_x_discrete(breaks = function(x){x[c(TRUE, FALSE)]}) +
-
-  theme_minimal()
-```
-### Plotting the Total Cars Production of All Countries
-=======
-
-## Total Cars Production of All Countries
-
-```{R}
-# Pivot wider on the cars filtered dataframe
-plot_cars_filtered <-
-  new_cars_df_filtered %>%
-    pivot_longer(cols = -Country, names_to = "Year", values_to = "Total")
-
-# Plot the cars production graph of all the countries
-plot_cars_filtered %>%
-  ggplot(aes(x = Year, y = Total, color = Country, group = Country)) +
-  geom_line() +
-  labs(title = "Total Cars Production",
-       subtitle = "By Countries and Year",
-       x = "Year",
-       y = "Total Cars Production",
-       caption = "Source: OICA") +
-  theme_minimal() +
-  scale_y_continuous(labels = comma) # Format y-axis from scientic notation to comma
-```
-
-# New Data Visualization
-
-## Step 1: Extract and Format World Oil Supplies
-
-```{r}
-# Extract "WORLD" row from new_oil_df
-world_row <- new_oil_df[new_oil_df$Country == "WORLD", ]
-
-# Remove the first column (Country)
-world_data <- as.numeric(world_row[-1])
-
-# Create a data frame with "Oil Supplies" as Country and the extracted data
-world_df <- data.frame(Country = "Oil Supplies", t(world_data))
-
-print(world_df)
-```
-
-## Step 2: Get Car Production by BRIC and Non-BRIC
+## Step 5: Get Car Production by BRIC and Non-BRIC
 
 ```{r}
 # Filter BRIC countries
@@ -402,124 +310,146 @@ total_non_bric_cars <- cbind("Country" = "non-BRIC", total_non_bric_cars)
 
 # Bind both tables
 processed_cars_grouped <- rbind(total_bric_cars, total_non_bric_cars)
+print(processed_cars_grouped)
+
+
+```
+### Step 4: Write CSV Out for Car and Oil Data
+
+```{r}
+# Write CSV file for BRIC oil
+write.csv(total_oil_grouped, file = "processed_oil_grouped.csv", row.names = FALSE)
 
 # Write CSV file for Car Production (BRIC & Non BRIC)
 write.csv(processed_cars_grouped, file = "processed_cars_grouped.csv", row.names = FALSE)
 ```
 
-## Step 3: Verify both dataframes have different columns based on years
-
+### Step 5: Consolidate all relevant data into 1 dataframe for plotting
 ```{r}
-colnames(processed_cars_grouped)
-colnames(world_df)
+processed_cars_grouped = processed_cars_grouped |>
+  mutate(Class = "Cars")
+total_oil_grouped= total_oil_grouped |>
+  mutate(Class = "Oil")
+
+all_data_grouped = rbind(processed_cars_grouped |> mutate(Class = "Cars"), total_oil_grouped |> mutate(Class = "Oil"))
 ```
 
-## Step 4: Create dataframe with desired years for World Supplies
 
-```{r} 
-years <- as.character(1999:2023)
-template <- data.frame(matrix(NA, nrow = 1, ncol = length(years) + 1))
-colnames(template) <- c("Country", years)
-```
+# Data Visualization
 
-## Step 5: Extract world data and select columns for 1999 to 2023
-
+## Total Oil and Car Production of BRIC and Non-BRIC Countries
 ```{r}
-world_selected <- new_oil_df %>%
-  filter(Country == "WORLD") %>%
-  select(Country, all_of(years))
+## Pivot Oil Data for plotting
+total_oil = total_oil_grouped |>
+  pivot_longer(cols = !c(Country, Class), names_to = "Year", values_to = "Total") |>
+  group_by(Year) |>
+  summarise(Sum=sum(Total) )
 
-print(world_selected)
+## Pivot Car data for plotting
+total_car = all_data_grouped %>%
+  pivot_longer(cols = !c(Country, Class), names_to = "Year", values_to = "Total") %>%
+  pivot_wider(names_from = Class, values_from = Total)
+
+  ggplot() +
+  geom_area(data=total_car, aes(x=Year, y=Cars, fill=Country, group=Country), alpha = 0.5, size=0.8) +
+  geom_line(data=total_oil, aes(x=Year, y=Sum*1300, group=1, color='Oil'), size=1) +
+  geom_vline(xintercept = "2004", linetype = 2, color = 'black', linewidth = 0.5) +
+  geom_vline(xintercept = "2009", linetype = 2, color = 'black', linewidth = 0.5) +
+  geom_vline(xintercept = "2020", linetype = 2, color = 'black', linewidth = 0.5) +
+  annotate(geom = "text", x = "2004", y = 1e+6, hjust=0, vjust = 1.5, size = 3,label = "Production rate diverges", color = "black",
+             angle = 90) +
+  annotate(geom = "text", x = "2009", y = 1e+6, hjust=0, vjust = 1.5,size = 3,label = "Asian Financial Crisis", color = "black",
+         angle = 90) +
+  annotate(geom = "text", x = "2020", y = 1e+6, hjust=0, vjust = 1.5,size = 3,label = "Covid-19 Epidemic", color = "black",
+         angle = 90) +
+  xlim(1999,2023) +
+  labs(title = "Total Car and Oil Production",
+       subtitle = "By BRIC & non-BRIC Countries and Year",
+       x = "Year",
+       y = "Total Car Production",
+       caption = "Source: EIA, OCIA") +
+  scale_y_continuous(labels = unit_format(unit = "M", scale = 1e-6),
+                     sec.axis = sec_axis(~ . / 1300, name = "Total Oil Production Oil (Mb/d)", labels= unit_format(unit = "K", scale=1e-3)),
+                     expand= c(0,1)) +
+  scale_x_discrete(breaks = function(x){x[c(TRUE, FALSE)]},
+                   expand= c(0,0)) +
+  scale_color_manual(name = "Country",
+                     values=c("#000000"),
+                     labels = c("Oil")) +
+  theme(plot.title = element_text(size=13, hjust=0.5)) +
+  theme(plot.subtitle = element_text(size=8, hjust=0.5)) +
+  theme(axis.title.x = element_text(size=9)) +
+  theme(axis.title.y = element_text(size=9)) +
+  theme(legend.position = c(0.1,0.8)) +
+  theme(legend.spacing.y = unit(0.0, "cm"),
+        legend.title = element_blank(),
+        legend.key.spacing.y = unit(0.5, "cm"),
+        legend.background = element_blank(),
+        legend.box.background = element_rect(size=0.5),
+        panel.background = element_rect(fill='white'),
+        panel.grid.major = element_line(color="#EEEEEE"),
+        panel.grid.minor = element_line(color="#EEEEEE"))
 ```
-
-## Step 6: Plot Car Production and Oil Supplies
+## Year on year change in production for Car and Oil
 ```{r}
-world_long <- world_selected %>%
-  pivot_longer(-Country, names_to = "Year", values_to = "Oil_Supplies")
 
-cars_long <- processed_cars_grouped %>%
-  pivot_longer(-Country, names_to = "Year", values_to = "Car_Production")
-
-# Normalize the data
-world_long <- world_long %>%
-  mutate(Normalized_Oil_Supplies = Oil_Supplies / max(Oil_Supplies))
-
-cars_long <- cars_long %>%
-  mutate(Normalized_Car_Production = Car_Production / max(Car_Production))
-
-# Combine the normalized data
-combined_normalized <- bind_rows(
-  world_long %>% rename(Value = Normalized_Oil_Supplies) %>% mutate(Type = "Normalized Oil Supplies"),
-  cars_long %>% rename(Value = Normalized_Car_Production) %>% mutate(Type = "Normalized Car Production")
-)
-
-
-# Plot
-ggplot() +
-  geom_ribbon(data = world_long[world_long$Country == "WORLD", ], aes(x = as.numeric(Year), ymin = 0, ymax = Normalized_Oil_Supplies, fill = Country), alpha = 0.2) +
-  geom_ribbon(data = world_long[world_long$Country == "non-BRIC", ], aes(x = as.numeric(Year), ymin = 0, ymax = Normalized_Oil_Supplies, fill = Country), alpha = 0.2) +
-  geom_ribbon(data = world_long[world_long$Country == "BRIC", ], aes(x = as.numeric(Year), ymin = 0, ymax = Normalized_Oil_Supplies, fill = Country), alpha = 0.2) +
-
-  geom_ribbon(data = cars_long[cars_long$Country == "WORLD", ], aes(x = as.numeric(Year), ymin = 0, ymax = Normalized_Car_Production, fill = Country), alpha = 0.2) +
-  geom_ribbon(data = cars_long[cars_long$Country == "non-BRIC", ], aes(x = as.numeric(Year), ymin = 0, ymax = Normalized_Car_Production, fill = Country), alpha = 0.2) +
-  geom_ribbon(data = cars_long[cars_long$Country == "BRIC", ], aes(x = as.numeric(Year), ymin = 0, ymax = Normalized_Car_Production, fill = Country), alpha = 0.2) +
-
-  geom_line(data = world_long, aes(x = as.numeric(Year), y = Normalized_Oil_Supplies, color = Country, linetype = "Oil Supplies"), linewidth = 1) +
-  geom_line(data = cars_long, aes(x = as.numeric(Year), y = Normalized_Car_Production, color = Country, linetype = "Car Production"), linewidth = 1) +
+#Pivot all data
+longdata = all_data_grouped |>
+  pivot_longer(cols = !c(Country,Class), names_to = "Year", values_to = "Total") |>
+  pivot_wider(names_from = Class, values_from = Total) |>
+  arrange(Year)
   
-  scale_y_continuous(
-    name = "Normalized Values",
-    sec.axis = sec_axis(~ . * max(cars_long$Car_Production), name = "Car Production")
-  ) +
-  labs(
-    title = "Normalized World Oil Supplies and Car Production (BRIC and Non-BRIC)",
-    x = "Year",
-    color = "Country",
-    linetype = "Type",
-    fill = "Country",
-    caption = "Source: OICA, EIA"
-  ) +
-  theme_minimal()
+#add YoY % change to columns
+data = longdata |>
+  group_by(Country) |>
+  mutate(Car_Change = round(c(NA, diff(Cars))/lag(Cars, default = 0) *100, digits=2)) |>
+  mutate(Oil_Change = round(c(NA, diff(Oil))/lag(Oil, default = 0) *100, digits=2)) |>
+  arrange(Country) |>
+  mutate_all(~ replace(., is.na(.), 0))
+
+#Aggregate oil data
+oil_sum = data |>
+  ungroup() |>
+  group_by(Year) |>
+  summarise(total = sum(Oil_Change))
+
+ggplot() +
+  geom_area(data = data, aes(x=Year, y=Car_Change, group = Country, fill=Country), linetype = 'solid', size=0.8, position='identity', alpha=0.5) +
+  geom_line(data = oil_sum, aes(x=Year, y=total, color='Oil Change'), group=1, linetype = 'solid', size=0.8, alpha=1) +
+  geom_vline(xintercept = "2004", linetype = 2, color = 'black', linewidth = 0.5) +
+  geom_vline(xintercept = "2009", linetype = 2, color = 'black', linewidth = 0.5) +
+  geom_vline(xintercept = "2020", linetype = 2, color = 'black', linewidth = 0.5) +
+  annotate(geom = "text", x = "2004", y = -24, hjust=0, vjust = 1.5, size = 3,label = "Production rate diverges", color = "black",
+             angle = 90) +
+  annotate(geom = "text", x = "2009", y = -24, hjust=0, vjust = 1.5,size = 3,label = "Asian Financial Crisis", color = "black",
+         angle = 90) +
+  annotate(geom = "text", x = "2020", y = -24, hjust=0, vjust = 1.5,size = 3,label = "Covid-19 Epidemic", color = "black",
+         angle = 90) +
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = "1999") +
+  scale_x_discrete(breaks = function(x){x[c(TRUE, FALSE)]},
+                 expand= c(0,0)) +
+  scale_color_manual(labels=c("Oil Production"),
+                     values=c("#000000")) +
+  scale_fill_discrete(labels=c("BRIC - Car Production", "Non-BRIC - Car Production")) +
+  labs(title = "Year on Year change on Car and Oil Production",
+       subtitle = "By BRIC & non-BRIC Countries and Year",
+       x = "Year",
+       y = "% Change",
+       caption = "Source: EIA, OCIA") +
+  theme(legend.spacing.y = unit(0.0, "cm"),
+        plot.title = element_text(size=13, hjust=0.5),
+        plot.subtitle = element_text(size=8, hjust=0.5),
+        axis.title.x = element_text(size=9),
+        axis.title.y = element_text(size=9),
+        legend.position = c(0.8,0.8),
+        legend.title = element_blank(),
+        legend.key.spacing.y = unit(0.5, "cm"),
+        legend.background = element_blank(),
+        legend.box.background = element_rect(size=0.5),
+        panel.background = element_rect(fill='white'),
+        panel.grid.major = element_line(color="#EEEEEE"),
+        panel.grid.minor = element_line(color="#EEEEEE"),
+        plot.margin = unit(c(0,1,0,0), "cm"))
+
 ```
-
-
-## Percentage Change in Oil Production from Baseline
-
-```{r}
-# Define the baseline year
-base_year <- min(common_years)
-
-# Calculate percentage change for car production
-total_oil_grouped_pct_change <- total_oil_grouped %>%
-  pivot_longer(cols = -Country, names_to = "Year", values_to = "Total_petroleum_and_other_liquids") %>%
-  mutate(Year = as.numeric(Year)) %>%
-  group_by(Country) %>%
-  mutate(Percent_Change = (Total_petroleum_and_other_liquids - Total_petroleum_and_other_liquids[Year == base_year]) / Total_petroleum_and_other_liquids[Year == base_year] * 100)
-
-# Calculate percentage change for world oil supplies
-world_selected_long <- world_selected %>%
-  pivot_longer(cols = -Country, names_to = "Year", values_to = "World_Supplies") %>%
-  mutate(Year = as.numeric(Year)) %>%
-  group_by(Country) %>%
-  mutate(Percent_Change = (World_Supplies - World_Supplies[Year == base_year]) / World_Supplies[Year == base_year] * 100)
-
-# Combine the data frames
-combined_pct_change <- bind_rows(
-  total_oil_grouped_pct_change %>% select(Country, Year, Percent_Change),
-  world_selected_long %>% select(Country, Year, Percent_Change)
-)
-
-# Plot the combined data
-combined_pct_change %>%
-  ggplot(aes(x = Year, y = Percent_Change, color = Country, group = Country)) +
-  geom_line(linewidth = 1) +
-  labs(
-    title = "Percentage Change in Total Petroleum and Other Liquids Production",
-    subtitle = paste("From Baseline Year", base_year),
-    x = "Year",
-    y = "Percentage Change (%)",
-    caption = "Source: EIA"
-  ) +
-  theme_minimal()
-```
-
