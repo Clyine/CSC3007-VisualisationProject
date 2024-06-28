@@ -24,31 +24,31 @@ library(knitr)
 
 # Introduction
 
-CrudeOilPeak[^1], a website that tracks global oil production and consumption as well as its impact on the economy, states that over the past decade, global car production has surged by 52%, predominantly driven by China's growth. In contrast, oil supplies have only increased by 16%[^2]. This disparity highlights a significant challenge: the demand for cars is outpacing the available oil supply.
+CrudeOilPeak[^1], a website that tracks global oil production and consumption as well as its impact on the economy, states that over the past decade, global car production has surged by 52%, predominantly driven by China's growth. In contrast, oil supplies have only increased by 16%[^2]. This disparity highlights a significant challenge: the demand for cars is outpacing the available oil supply. 
+
+To further illustrate this issue, they have created a visualization that compares the growth in car production by country/region against the growth in global liquid supplies (@fig-on-poster). We found the visualization to be severely lacking and messy, and believe that it can be improved to be more visually appealing and easier to digest.
 
 [^1]: <https://crudeoilpeak.info>
 
 [^2]: <https://crudeoilpeak.info/world-car-production-grows-3-times-faster-than-global-oil-supplies>
-
-To further illustrate this issue, they have created a visualization that compares the growth in car production by country/region against the growth in global liquid supplies (@fig-on-poster). We found the visualization to be severely lacking and messy, and believe that it can be improved to be more visually appealing and easier to digest.
 
 # Previous Visualization
 
 ```{r}
 #| label: fig-on-poster
 #| fig-cap: "Car production by country/region vs global liquid supplies"
-#| out-width: 89%
+#| out-width: 95%
 
 knitr::include_graphics("previous_visualisation.jpg")
 ```
 
 # Strengths
 
-1.  **High amount of information**: The graph allows users to pinpoint and gather data specific to each country.
+1.    **Title**: The title is impactful and states the main point of the visualization.
 
-2.  **Country Flags**: Area filling with country flags makes it possible to identify the country in question without referencing the plot legends.
+2.    **Annotation**: The annotation provides context and explains the significance of the black line.
 
-3.  **Divergence**: The data clearly shows the point where car and oil production diverge.
+3.    **Divergence**: The data clearly shows the point where car and oil production diverge.
 
 # Suggested Improvements
 
@@ -62,6 +62,8 @@ knitr::include_graphics("previous_visualisation.jpg")
 
 5.    **Color Scheme**: Choose a better color scheme to fit the user's natural bias (e.g., Red for BRIC, Blue for non-BRIC countries).
 
+6.    **Multiple y-axis**: The graph currently has two y-axis, which can be confusing for the average reader to understand.
+
 To make the graph more intuitive, we propose simplifying it to highlight key points. The article focuses on three main points:
 
 1.    **Divergence** between car production and oil production starting from 2005.
@@ -69,12 +71,6 @@ To make the graph more intuitive, we propose simplifying it to highlight key poi
 2.    **Sharp increase** in car production in BRIC countries after 2005.
 
 3.    Comparison between **BRIC** and **non-BRIC** countries.
-
-To achieve this, we suggest creating two smaller visualizations:
-
-1.    The first graph will main the original format, but with fewer countries to reduce clutter.
-
-2.    The second graph will show the yearly percentage change in car production for both BRIC and non-BRIC countries, making it easier to see the rate of change.
 
 # Implementation
 
