@@ -37,8 +37,9 @@ To further illustrate this issue, they have created a visualization that compare
 ```{r}
 #| label: fig-on-poster
 #| fig-cap: "Car production by country/region vs global liquid supplies"
-#| fig-height: 5.8
-#| out-width: 75%
+#| fig-height: 6.5
+#| fig-align: center
+#| out-width: 83%
 
 knitr::include_graphics("previous_visualisation.jpg")
 ```
@@ -46,32 +47,36 @@ knitr::include_graphics("previous_visualisation.jpg")
 # Strengths
 
 1.  High amount of information shown on the graph. Users can pinpoint and gather data specific to each country.
+
 2.  Area filling with country flags make it possible to identity country in question without referencing the plot legends.
+
 3.  Data clearly shows the point in which car and oil production diverges.
 
 # Suggested Improvements
 
-To better allow the purpose of the graph to be intuitive to the reader, we propose to limit the amount of information in the graph to only those that are important to the point we are driving across. For the purpose of the article, we have identified 3 main points the author is trying to illustrate.
+1.    *Too much visual clutter* can make it difficult to interpret the data. Stick to a consistent color scheme and remove unnecessary elements.
 
-1.  There is a divergence between car production and oil production starting from year 2005.
+2.    *Do not add flags to the graph* as it adds significant amount of visual clutter due to the sheer number of countries
 
-2.  There is a sharp increase in car production in BRIC countries in the years following 2005.
+3.    *The divergence* can be better emphasized, more contrasting colors can be chosen. Current graph uses black on black.
 
-3.  The main comparison made was between BRIC and non-BRIC countries.
+4.    *Aggregate data*. The data illustrated are too fine-grained. A significant number of countries in the graph does not increase the amount of information gained from the illustration due to its negligible magnitude.
 
-To make it more intuitive for the reader, we propose splitting the main visualization into 2 different visualization. The first visualization will remain in the same format as the original graph, but with countries limited to reduce visual cluttering.
+5.    *Color Scheme*. Better color scheme can be chosen to fit the users natural bias. (i.e. Red for RBIC, Blue for Non-BRIC countries)
 
-For the second point, a % change in car production on a yearly basis for both groups will be plotted. This will be used to illustrate the rate of change in car production between both group better than a stacked area graph.
+To make the graph more intuitive, we propose simplifying it to highlight the key points. The article focuses on three main points:
 
-1.  *Too much visual clutter* can make it difficult to interpret the data. Stick to a consistent color scheme and remove unnecessary elements.
+1.    **Divergence** between car production and oil production starting from 2005.
 
-2.  *Do not add flags to the graph* it adds significant amount of visual clutter due to the sheer number of countries
+2.    **Sharp increase** in car production in BRIC countries after 2005.
 
-3.  *The growth paths divergence* can be better emphasized, more contrasting colors can be chosen. Current graph uses black on black.
+3.    Comparison between **BRIC** and **non-BRIC** countries.
 
-4.  *Aggregate data* The data illustrated are too fine-grained. A significant number of countries in the graph does not increase the amount of information gained from the illustration due to its negligible magnitude.
+To achieve this, we suggest creating two smaller visualisations:
 
-5.  *Color Scheme* Better color scheme can be chosen to fit the users natural bias. (i.e. Red for RBIC, Blue for Non-BRIC countries)
+1.    The first graph will main the original format, but with fewer countries to reduce clutter.
+
+2.    The second graph will show the yearly precentage change in car production for both BRIC and non-BRIC countries, making it easier to see the rate of change.
 
 # Implementation
 
@@ -93,19 +98,9 @@ We used the Quarto publication framework and the R programming language, along w
 -   *tidyverse* for data transformation, including *ggplot2* for visualization based on the grammar of graphics
 -   *knitr* for dynamic document generation
 
-```{=typst}
-#v(2em)
-```
-
 # Further Suggestions for Interactivity
 
-Because our visualization was intended for a poster, we did not implement any interactive features, including the infotip. However, if the data are visualized in an HTML document, interactive features can be achieved using the R packages such as *plotly*. In that case, we recommend that the a tooltip that shows the actual label values on a mouse over event, offering additional if necessary by the user. 
-
-
-
-# Conclusion
-
-We successfully implemented all suggested improvements for the non-interactive visualization. The users can clearly see the divergence in production between Oil and Cars. The second graph fully supports this idea intuitively as the % change in Car production is always higher than % Change in Oil production. (i.e. the line drawn is always above.)
+Because our visualization was intended for a poster, we did not implement any interactive features, including the infotip. However, if the data is visualized in a HTML document, interactive features can be achieved using R packages such as `plotly`. In that case, we recommend implementing a tooltip that shows the actual label values on a mouse over event, offering additional info, if necessary, for the user. 
 
 # Improved Visualization
 
@@ -133,4 +128,6 @@ knitr::include_graphics("Graph2.png")
 
 ```
 
+# Conclusion
 
+We successfully implemented all suggested improvements for the non-interactive visualization. The users can clearly see the divergence in production between oil and cars. The second graph fully supports this idea intuitively as the percentage change in car production is always higher than the change in oil production (i.e., the line drawn is always above).
