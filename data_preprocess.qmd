@@ -30,7 +30,7 @@ library(knitr)
 #| echo: false
 #| fig.cap: "Visualization of world car production growth compared to global oil supplies from 1999 to 2012 by @Matt."
 
-include_graphics("previous_visualisation.jpg")
+include_graphics("./images/original-graph.png")
 ```
 
 ## Visualization Source
@@ -283,6 +283,7 @@ total_oil_grouped = rbind(total_bric_oil, total_non_bric_oil)
   
 print(total_oil_grouped)
 ```
+
 ## Step 5: Get Car Production by BRIC and Non-BRIC
 
 ```{r}
@@ -314,6 +315,7 @@ print(processed_cars_grouped)
 
 
 ```
+
 ### Step 4: Write CSV Out for Car and Oil Data
 
 ```{r}
@@ -325,6 +327,7 @@ write.csv(processed_cars_grouped, file = "processed_cars_grouped.csv", row.names
 ```
 
 ### Step 5: Consolidate all relevant data into 1 dataframe for plotting
+
 ```{r}
 processed_cars_grouped = processed_cars_grouped |>
   mutate(Class = "Cars")
@@ -334,10 +337,10 @@ total_oil_grouped= total_oil_grouped |>
 all_data_grouped = rbind(processed_cars_grouped |> mutate(Class = "Cars"), total_oil_grouped |> mutate(Class = "Oil"))
 ```
 
-
 # Data Visualization
 
 ## Total Oil and Car Production of BRIC and Non-BRIC Countries
+
 ```{r}
 ## Pivot Oil Data for plotting
 total_oil = total_oil_grouped |>
@@ -390,7 +393,9 @@ total_car = all_data_grouped %>%
         panel.grid.major = element_line(color="#EEEEEE"),
         panel.grid.minor = element_line(color="#EEEEEE"))
 ```
+
 ## Year on year change in production for Car and Oil
+
 ```{r}
 
 #Pivot all data

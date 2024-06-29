@@ -39,12 +39,12 @@ To further illustrate this issue, they have created a visualization that compare
 #| fig-cap: "Car production by country/region vs global liquid supplies"
 #| out-width: 95%
 
-knitr::include_graphics("previous_visualisation.jpg")
+knitr::include_graphics("./images/original-graph.png")
 ```
 
 # Strengths
 
-1.    **Title**: The title is impactful and states the main point of the visualization.
+1.    **Article Title**: The article title is impactful and states the main point of the visualization.
 
 2.    **Annotation**: The annotation provides context and explains the significance of the black line.
 
@@ -106,7 +106,7 @@ Because our visualization was intended for a poster, we did not implement any in
 #| fig-height: 5.8
 #| out-width: 100%
 
-knitr::include_graphics("Graph1.png")
+knitr::include_graphics("./images/graph-1.png")
 
 ```
 
@@ -118,7 +118,7 @@ knitr::include_graphics("Graph1.png")
 #| fig-height: 5.8
 #| out-width: 100%
 
-knitr::include_graphics("Graph2.png")
+knitr::include_graphics("./images/graph-2.png")
 
 ```
 
