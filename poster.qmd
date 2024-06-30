@@ -100,10 +100,7 @@ Because our visualization was intended for a poster, we did not implement any in
 
 ```{r}
 #| label: fig-ggplot2
-#| fig-cap: "Revised visualization of car production by country/region vs 
-#|  global liquid supplies."
-#| fig-width: 6.0
-#| fig-height: 5.8
+#| fig-cap: "Revised visualization of world car production outpaces global oil supplies"
 #| out-width: 100%
 
 knitr::include_graphics("./images/graph-1.png")
@@ -112,11 +109,8 @@ knitr::include_graphics("./images/graph-1.png")
 
 ```{r}
 #| label: fig-ggplot3
-#| fig-cap: "Revised visualization of car production by country/region vs 
-#|  global liquid supplies."
-#| fig-width: 6.0
-#| fig-height: 5.8
-#| out-width: 100%
+#| fig-cap: "Revised visualization of yearly change of car and oil production"
+#| out-width: 95%
 
 knitr::include_graphics("./images/graph-2.png")
 
