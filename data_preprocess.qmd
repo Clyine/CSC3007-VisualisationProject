@@ -359,6 +359,7 @@ ggplot() +
   annotate(geom = "text", x = as.numeric("2004"), y = 1e+6, hjust = 0, vjust = 1.5, size = 3, label = "Production rate diverges", color = "black", angle = 90) +
   annotate(geom = "text", x = as.numeric("2009"), y = 1e+6, hjust = 0, vjust = 1.5, size = 3, label = "Asian Financial Crisis", color = "black", angle = 90) +
   annotate(geom = "text", x = as.numeric("2020"), y = 1e+6, hjust = 0, vjust = 1.5, size = 3, label = "Covid-19 Epidemic", color = "black", angle = 90) +
+  annotate(geom = "label", x = 2015, y = max(total_oil$Sum * 1300) * 1.05, label = "Oil Production", size = 3) +
   labs(title = "World Car Production Outpaces Global Oil Supplies",
        subtitle = "By BRIC & non-BRIC Countries and Year",
        x = "Year",
