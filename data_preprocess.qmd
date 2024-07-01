@@ -353,19 +353,19 @@ total_car <- all_data_grouped |>
 
 # Plot using ggplot
 ggplot() +
-  geom_area(data = total_car, aes(x = as.numeric(Year), y = Cars, fill = Country, group = Country), alpha = 0.5, size = 0.8) +
+  geom_area(data = total_car, aes(x = as.numeric(Year), y = Cars, fill = Country, group = Country), alpha = 0.5, linewidth = 0.8) +
   geom_line(data = total_oil, aes(x = as.numeric(Year), y = Sum * 1300), color = 'black', linewidth = 1) +
   geom_vline(xintercept = as.numeric(c("2004", "2009", "2020")), linetype = 2, color = 'black', linewidth = 0.5) +
-  annotate(geom = "text", x = as.numeric("2004"), y = 1e+6, hjust = 0, vjust = 1.5, size = 3, label = "Production rate diverges", color = "black", angle = 90) +
-  annotate(geom = "text", x = as.numeric("2009"), y = 1e+6, hjust = 0, vjust = 1.5, size = 3, label = "Asian Financial Crisis", color = "black", angle = 90) +
-  annotate(geom = "text", x = as.numeric("2020"), y = 1e+6, hjust = 0, vjust = 1.5, size = 3, label = "Covid-19 Epidemic", color = "black", angle = 90) +
+  annotate(geom = "text", x = as.numeric("2004"), y = 1e+6, hjust = 0, vjust = 1.8,  size = 3, label = "Production rate diverges", color = "black", angle = 90) +
+  annotate(geom = "text", x = as.numeric("2009"), y = 1e+6, hjust = 0, vjust = 1.8, size = 3, label = "Asian Financial Crisis", color = "black", angle = 90) +
+  annotate(geom = "text", x = as.numeric("2020"), y = 1e+6, hjust = 0, vjust = 1.8, size = 3, label = "Covid-19 Epidemic", color = "black", angle = 90) +
   annotate(geom = "label", x = 2015, y = max(total_oil$Sum * 1300) * 1.05, label = "Oil Production", size = 3) +
   labs(title = "World Car Production Outpaces Global Oil Supplies",
        subtitle = "By BRIC & non-BRIC Countries and Year",
        x = "Year",
        y = "Total Car Production",
        caption = "Source: EIA, OCIA") +
-  scale_y_continuous(labels = scales::unit_format(unit = "M", scale = 1e-6), expand = c(0, 0)) +
+  scale_y_continuous(labels = scales::unit_format(unit = "M", scale = 1e-6), expand =   c(0, 0)) +
   scale_x_continuous(breaks = seq(1999, 2023, by = 2), limits = c(1999, 2023), expand = c(0, 0)) +
   scale_fill_brewer(palette = "Set1") +
   theme(plot.title = element_text(size = 13, hjust = 0.5),
@@ -407,15 +407,16 @@ oil_sum = data |>
   group_by(Year) |>
   summarise(total = sum(Oil_Change))
 
+# Plot using ggplot
 ggplot() +
-  geom_area(data = data, aes(x = Year, y = Car_Change, group = Country, fill = Country), linetype = 'solid', size = 0.8, position = 'identity', alpha = 0.5) +
-  geom_line(data = oil_sum, aes(x = Year, y = total, color = 'Oil Change'), group = 1, linetype = 'solid', size = 0.6, alpha = 1) +
+  geom_area(data = data, aes(x = Year, y = Car_Change, group = Country, fill = Country), linetype = 'solid', linewidth = 0.8, position = 'identity', alpha = 0.5) +
+  geom_line(data = oil_sum, aes(x = Year, y = total, color = 'Oil Change'), group = 1, linetype = 'solid', linewidth = 0.6, alpha = 1) +
   geom_vline(xintercept = "2004", linetype = 2, color = 'black', linewidth = 0.5) +
   geom_vline(xintercept = "2009", linetype = 2, color = 'black', linewidth = 0.5) +
   geom_vline(xintercept = "2020", linetype = 2, color = 'black', linewidth = 0.5) +
-  annotate(geom = "text", x = "2004", y = -24, hjust = 0, vjust = 3, size = 3, label = "Production rate diverges", color = "black", angle = 90) +
-  annotate(geom = "text", x = "2009", y = -24, hjust = 0, vjust = 3, size = 3, label = "Asian Financial Crisis", color = "black", angle = 90) +
-  annotate(geom = "text", x = "2020", y = -24, hjust = 0, vjust = 3, size = 3, label = "Covid-19 Epidemic", color = "black", angle = 90) +
+  annotate(geom = "text", x = "2004", y = -24, hjust = 0, vjust = 1.8, size = 3, label = "Production rate diverges", color = "black", angle = 90) +
+  annotate(geom = "text", x = "2009", y = -24, hjust = 0, vjust = 1.8, size = 3, label = "Asian Financial Crisis", color = "black", angle = 90) +
+  annotate(geom = "text", x = "2020", y = -24, hjust = 0, vjust = 1.8, size = 3, label = "Covid-19 Epidemic", color = "black", angle = 90) +
   geom_hline(yintercept = 0) +
   geom_vline(xintercept = "1999") +
   scale_x_discrete(breaks = function(x) { x[c(TRUE, FALSE)] }, expand = c(0, 0)) +
