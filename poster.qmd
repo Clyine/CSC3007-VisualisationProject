@@ -24,9 +24,9 @@ library(knitr)
 
 # Introduction
 
-CrudeOilPeak[^1], a website that tracks global oil production and consumption as well as its impact on the economy, states that over the past decade, global car production has surged by 52%, predominantly driven by China's growth. In contrast, oil supplies have only increased by 16%[^2]. This disparity highlights a significant challenge: the demand for cars is outpacing the available oil supply. 
+CrudeOilPeak[^1], a website that tracks global oil production and consumption as well as its impact on the economy, states that over the past decade, global car production has surged by 52%, predominantly driven by China's growth. In contrast, oil supplies have only increased by 16%[^2]. This disparity highlights a significant challenge: the demand for cars outpacing the available oil supply. 
 
-To further illustrate this issue, they have created a visualization that compares the growth in car production by country/region against the growth in global liquid supplies (@fig-on-poster). We found the visualization to be severely lacking and messy, and believe that it can be improved to be more visually appealing and easier to digest.
+To further illustrate this issue, a visualization was created to compare the growth in car production by country/region against the growth in global liquid supplies (@fig-on-poster). We found the visualization to be severely lacking and cluttered, and believe that it can be improved to be more visually appealing and easier to comprehend.
 
 [^1]: <https://crudeoilpeak.info>
 
@@ -78,7 +78,7 @@ To make the graph more intuitive, we propose simplifying it to highlight key poi
 
 -   Car production data by country/region were obtained from the International Organization of Motor Vehicle Manufacturers (OICA) for the year 2023[^3].
 
--   Similarly, the oil production data were obtained from the U.S. Energy Information Administration[^4]. However, the data was not bundled together initially, so we had to manually combine and summarize the data from the different sources.
+-   Similarly, the oil production data were obtained from the U.S. Energy Information Administration[^4]. However, since the data was not bundled together initially, the data had to be manually combined and summarized from various sources.
 
 [^3]: <https://www.oica.net/category/production-statistics/>
 
@@ -86,7 +86,7 @@ To make the graph more intuitive, we propose simplifying it to highlight key poi
 
 ## Software
 
-We used the Quarto publication framework and the R programming language, along with the following third-party packages:
+Quarto publication framework and the R programming language was used, along with the following third-party packages:
 
 -   *readxl* for data import
 -   *tidyverse* for data transformation, including *ggplot2* for visualization based on the grammar of graphics
@@ -94,7 +94,7 @@ We used the Quarto publication framework and the R programming language, along w
 
 # Further Suggestions for Interactivity
 
-Because our visualization was intended for a poster, we did not implement any interactive features, including the infotip. However, if the data is visualized in a HTML document, interactive features can be achieved using R packages such as `plotly`. In that case, we recommend implementing a tooltip that shows the actual label values on a mouse over event, offering additional info, if necessary, for the user. 
+As the visualization was intended for a poster, no interactive features were implemented, including the infotip. However, if the data is visualized in a HTML document, interactive features can be achieved using R packages such as `plotly`. In that case, we recommend implementing a tooltip that shows the actual label values on a mouse over event, offering additional info, if necessary, for the user. 
 
 # Improved Visualization
 
@@ -118,4 +118,4 @@ knitr::include_graphics("./images/graph-2.png")
 
 # Conclusion
 
-We successfully implemented all suggested improvements for the non-interactive visualization. Users can clearly see the divergence in production between oil and cars. The second graph fully supports this idea intuitively, as the percentage change in car production is always higher than the change in oil production (i.e., the line drawn is always above).
+We successfully implemented all suggested improvements for the non-interactive visualization. Users are able to view the divergence in production between oil and cars. The second graph fully supports this idea intuitively, as the percentage change in car production is always higher than the change in oil production (i.e., the line drawn is always above).
