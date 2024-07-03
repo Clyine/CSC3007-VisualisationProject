@@ -169,7 +169,7 @@
       columns: (title_column_size, univ_logo_column_size),
       column-gutter: 0pt,
       row-gutter: 50pt,
-      text(title_font_size, title + "\n\n") + text(title_font_size*0.8, authors+"\n") +text(authors_font_size*0.8, emph(footer_email_ids +"@sit.singporetech.edu.sg")+ "\n") + text(authors_font_size*0.7, emph(departments)),
+      text(title_font_size, title + "\n\n") + text(title_font_size*0.8, authors+"\n") +text(authors_font_size*0.8, emph(footer_email_ids +"@sit.singaporetech.edu.sg")+ "\n") + text(authors_font_size*0.7, emph(departments)),
       image(univ_logo, width: univ_logo_scale),
     )
   )

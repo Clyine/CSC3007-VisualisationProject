@@ -6,7 +6,7 @@ format:
     poster-authors: "Jingquan Chen, John Wang, Keng Li Chia, Jourdan Lim, Perpetua Raj, Joey Tan"
     departments: "Computing Science"
     institution-logo: "./images/sit-logo.png"
-    footer-text: "Information Visualization 2024"
+    footer-text: "CSC3007 Information Visualization AY2023/2024 T3"
     footer-emails: "{2101268, 2101925, 2102718, 2102516, 2101771, 2001885}"
 execute:
   echo: false
@@ -34,7 +34,7 @@ To further illustrate this issue, a visualization was created to compare the gro
 
 [^2]: <https://crudeoilpeak.info/world-car-production-grows-3-times-faster-than-global-oil-supplies>
 
-# Previous Visualization
+# Original Visualization
 
 ```{r}
 #| label: fig-on-poster
@@ -68,9 +68,9 @@ knitr::include_graphics("./images/original-graph.png")
 
 To make the graph more intuitive, we propose simplifying it to highlight key points. The article focuses on three main points:
 
-1.  **Divergence** between car production and oil production starting from 2005.
+1.  Accurately defining the point of **divergence** between the car production in BRIC countries and oil production in 2004.
 
-2.  **Sharp increase** in car production in BRIC countries after 2005.
+2.  **Sharp increase** in car production in BRIC countries after 2004.
 
 3.  Comparison between **BRIC** and **non-BRIC** countries.
 
@@ -120,4 +120,5 @@ knitr::include_graphics("./images/graph-2.png")
 
 # Conclusion
 
-We successfully implemented all suggested improvements for the non-interactive visualization. Users are able to view the divergence in production between oil and cars. The second graph fully supports this idea intuitively, as the percentage change in car production is always higher than the change in oil production (i.e., the line drawn is always above).
+We successfully implemented all suggested improvements for the non-interactive visualization in (@fig-ggplot2). The new graph accurately highlights the point of divergence between car production in BRIC countries and oil production in 2004, supporting the main notion that the surging demand for cars as compared to oil production is mainly caused by BRIC countries. The second graph in (@fig-ggplot3) further reinforces this idea intuitively, as the yearly percentage change in car production in BRIC countries is predominately higher than the change in oil production as well as non-BRIC countries (i.e. the red line drawn is almost always above the rest).
+
