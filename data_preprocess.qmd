@@ -340,6 +340,7 @@ all_data_grouped = rbind(processed_cars_grouped |> mutate(Class = "Cars"), total
 ## World Car Production Outpaces Global Oil Supplies
 
 ```{r}
+suppressWarnings({
 # Pivot Oil Data for plotting
 total_oil <- total_oil_grouped |>
   pivot_longer(cols = -c(Country, Class), names_to = "Year", values_to = "Total") |>
@@ -354,12 +355,11 @@ total_car <- all_data_grouped |>
 # Plot using ggplot
 ggplot() +
   geom_area(data = total_car, aes(x = as.numeric(Year), y = Cars, fill = Country, group = Country), alpha = 0.5, linewidth = 0.8) +
-  geom_line(data = total_oil, aes(x = as.numeric(Year), y = Sum * 1300), color = 'black', linewidth = 1) +
-  geom_vline(xintercept = as.numeric(c("2004", "2009", "2020")), linetype = 2, color = 'black', linewidth = 0.5) +
+  geom_line(data = total_oil, aes(x = as.numeric(Year), y = Sum * 1300, color = 'Oil Production'), linewidth=1) +
+  geom_vline(xintercept = as.numeric(c("2004", "2009", "2020")), linetype = 2, group=1, color = 'black', linewidth = 0.5) +
   annotate(geom = "text", x = as.numeric("2004"), y = 1e+6, hjust = 0, vjust = 1.8,  size = 3, label = "Production rate diverges", color = "black", angle = 90) +
   annotate(geom = "text", x = as.numeric("2009"), y = 1e+6, hjust = 0, vjust = 1.8, size = 3, label = "Asian Financial Crisis", color = "black", angle = 90) +
   annotate(geom = "text", x = as.numeric("2020"), y = 1e+6, hjust = 0, vjust = 1.8, size = 3, label = "Covid-19 Epidemic", color = "black", angle = 90) +
-  annotate(geom = "label", x = 2015, y = max(total_oil$Sum * 1300) * 1.05, label = "Oil Production", size = 3) +
   labs(title = "World Car Production Outpaces Global Oil Supplies",
        subtitle = "By BRIC & non-BRIC Countries and Year",
        x = "Year",
@@ -367,14 +367,14 @@ ggplot() +
        caption = "Source: EIA, OCIA") +
   scale_y_continuous(labels = scales::unit_format(unit = "M", scale = 1e-6), expand =   c(0, 0)) +
   scale_x_continuous(breaks = seq(1999, 2023, by = 2), limits = c(1999, 2023), expand = c(0, 0)) +
-  scale_fill_brewer(palette = "Set1") +
+  scale_color_manual(name = "Country", values = c("#000000"), labels = c("Oil Production")) +
   theme(plot.title = element_text(size = 13, hjust = 0.5),
         plot.subtitle = element_text(size = 8, hjust = 0.5),
         axis.title.x = element_text(size = 9),
         axis.title.y = element_text(size = 9),
-        legend.position = "right",
+        legend.position = c(0.1, 0.8),
         legend.title = element_blank(),
-        legend.spacing.y = unit(0.5, "cm"),
+        legend.spacing.y = unit(0.0, "cm"),
         legend.key.spacing.y = unit(0.5, "cm"),
         legend.background = element_blank(),
         legend.box.background = element_rect(linewidth = 0.5),
@@ -382,11 +382,14 @@ ggplot() +
         panel.grid.major = element_line(color = "#EEEEEE"),
         panel.grid.minor = element_line(color = "#EEEEEE"),
         plot.margin = unit(c(0,1,0,0), "cm"))
+
+})
 ```
 
 ## Yearly Change of Car and Oil Production
 
 ```{r}
+suppressWarnings({
 # Pivot all data
 longdata = all_data_grouped |>
   pivot_longer(cols = !c(Country, Class), names_to = "Year", values_to = "Total") |>
@@ -409,7 +412,7 @@ oil_sum = data |>
 
 # Plot using ggplot
 ggplot() +
-  geom_area(data = data, aes(x = Year, y = Car_Change, group = Country, fill = Country), linetype = 'solid', linewidth = 0.8, position = 'identity', alpha = 0.5) +
+  geom_line(data = data, aes(x = Year, y = Car_Change, group = Country, color = Country), linetype = 'solid', linewidth = 0.8, alpha = 1) +
   geom_line(data = oil_sum, aes(x = Year, y = total, color = 'Oil Change'), group = 1, linetype = 'solid', linewidth = 0.6, alpha = 1) +
   geom_vline(xintercept = "2004", linetype = 2, color = 'black', linewidth = 0.5) +
   geom_vline(xintercept = "2009", linetype = 2, color = 'black', linewidth = 0.5) +
@@ -420,8 +423,7 @@ ggplot() +
   geom_hline(yintercept = 0) +
   geom_vline(xintercept = "1999") +
   scale_x_discrete(breaks = function(x) { x[c(TRUE, FALSE)] }, expand = c(0, 0)) +
-  scale_color_manual(labels = c("Oil Production"), values = c("#000000")) +
-  scale_fill_discrete(labels = c("BRIC - Car Production", "Non-BRIC - Car Production")) +
+  scale_color_manual(labels = c("BRIC - Car Production", "Non-BRIC - Car Production", "Oil Production"), values = c("#F8766D","#619CFF", "#000000")) +
   labs(title = "Yearly Change of Car and Oil Production",
        subtitle = "By BRIC & non-BRIC Countries and Year",
        x = "Year",
@@ -432,9 +434,11 @@ ggplot() +
     plot.subtitle = element_text(size = 8, hjust = 0.5),
     axis.title.x = element_text(size = 9),
     axis.title.y = element_text(size = 9),
-    legend.position = "bottom",
+    legend.position = c(0.85,0.85),
     legend.title = element_blank(),
     legend.key.size = unit(0.5, "cm"),
+    legend.spacing.y = unit(0.0, "cm"),
+    legend.key.spacing.y = unit(0.5, "cm"),
     legend.text = element_text(size = 7),
     legend.background = element_blank(),
     legend.box.background = element_rect(linewidth = 0.5),
@@ -443,4 +447,6 @@ ggplot() +
     panel.grid.minor = element_line(color = "#EEEEEE"),
     plot.margin = unit(c(0, 1, 0, 0), "cm")
   )
+
+})
 ```

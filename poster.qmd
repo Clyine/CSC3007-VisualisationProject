@@ -110,7 +110,7 @@ knitr::include_graphics("./images/graph-1.png")
 ```{r}
 #| label: fig-ggplot3
 #| fig-cap: "Revised visualization of yearly change of car and oil production"
-#| out-width: 95%
+#| out-width: 100%
 
 knitr::include_graphics("./images/graph-2.png")
 
